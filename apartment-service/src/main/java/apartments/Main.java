@@ -1,4 +1,4 @@
-package org.apartments;
+package apartments;
 
 import java.util.UUID;
 
@@ -6,7 +6,7 @@ public class Main {
 
     public static void main(String[] args) {
         // Initialize the database (create the table if it doesn't exist)
-        Database.initialize();
+        ApartmentsDatabase.initialize();
 
         // Adding an apartment (for testing)
         String name = "Sunset View";

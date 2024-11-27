@@ -1,6 +1,8 @@
-package org.apartments;
+package apartments;
 
-import lombok.NonNull;
+import apartments.Apartment;
+import apartments.ApartmentsDatabase;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +15,7 @@ public class ApartmentDAO {
     public static boolean addApartment(Apartment apartment) {
         String sql = "INSERT INTO apartments (id, name, address, noiselevel, floor) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = ApartmentsDatabase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // Set the parameters for the query
@@ -37,7 +39,7 @@ public class ApartmentDAO {
         String sql = "SELECT * FROM apartments WHERE id = ?";
         Apartment apartment = null;
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = ApartmentsDatabase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // Set the ID in the prepared statement
@@ -63,13 +65,13 @@ public class ApartmentDAO {
         List<Apartment> apartments = new ArrayList<>();
         String sql = "SELECT * FROM apartments";
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = ApartmentsDatabase.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Apartment apartment = parseApartment(rs);
-                apartments.add(apartment);
+                if (apartment != null) apartments.add(apartment);
             }
 
         } catch (SQLException e) {
@@ -80,13 +82,11 @@ public class ApartmentDAO {
     }
 
 
-
-
     // Method to remove an apartment by ID
     public static boolean removeApartmentById(UUID apartmentId) {
         String sql = "DELETE FROM apartments WHERE id = ?";
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = ApartmentsDatabase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, apartmentId.toString());
@@ -98,20 +98,37 @@ public class ApartmentDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return false;
+    }
+
+    public static void removeAllApartments() {
+        String sql = "DELETE FROM apartments";
+
+        try (Connection conn = ApartmentsDatabase.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            stmt.executeUpdate(sql);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 
     @Nullable
     private static Apartment parseApartment(ResultSet rs) throws SQLException {
-        UUID id = UUID.fromString(rs.getString("id"));
-        String name = rs.getString("name");
-        String address = rs.getString("address");
-        int noiseLevel = rs.getInt("noiseLevel");
-        int floor = rs.getInt("floor");
+        try {
+            UUID id = UUID.fromString(rs.getString("id"));
+            String name = rs.getString("name");
+            String address = rs.getString("address");
+            int noiseLevel = rs.getInt("noiseLevel");
+            int floor = rs.getInt("floor");
 
-        // Create an Apartment object and add it to the list
-        return new Apartment(id, name, address, noiseLevel, floor);
+            // Create an Apartment object and add it to the list
+            return new Apartment(id, name, address, noiseLevel, floor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

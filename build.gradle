@@ -1,27 +1,38 @@
+// Root build.gradle
+
 plugins {
-    id 'java'
+    id 'java' // Apply the Java plugin for all subprojects
 }
 
 group = 'org.example'
 version = '1.0-SNAPSHOT'
 
 repositories {
-    mavenCentral()
+    mavenCentral() // Shared repository
 }
 
-dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'io.rest-assured:rest-assured:5.3.0'
+subprojects {
+    apply plugin: 'java'
 
-    annotationProcessor 'org.checkerframework:checker:3.31.0'
+    repositories {
+        mavenCentral()
+    }
 
-    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.47.1.0'
-    implementation 'org.xerial:sqlite-jdbc:3.42.0.0'  // or your desired version
-    implementation 'com.sparkjava:spark-core:2.5.4'
-    implementation 'com.google.code.gson:gson:2.10'
-}
+    dependencies {
+        annotationProcessor 'org.checkerframework:checker:3.31.0'
 
-test {
-    useJUnitPlatform()
+        // Add other dependencies here
+        implementation 'org.checkerframework:checker-qual:3.31.0'
+        implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.47.1.0'
+        implementation 'com.sparkjava:spark-core:2.5.4'
+        implementation 'com.google.code.gson:gson:2.10'
+
+        // Testing dependencies
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'  // JUnit 5
+        testImplementation 'io.rest-assured:rest-assured:5.3.0'
+    }
+
+    test {
+        useJUnitPlatform()  // Enable JUnit 5 for testing
+    }
 }

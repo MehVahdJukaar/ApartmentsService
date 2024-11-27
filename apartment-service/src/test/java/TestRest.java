@@ -1,6 +1,6 @@
+import apartments.ApartmentApi;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.apartments.ApartmentApi;
 import org.junit.jupiter.api.*;
 
 import static io.restassured.RestAssured.*;

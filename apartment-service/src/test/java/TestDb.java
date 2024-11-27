@@ -1,14 +1,11 @@
-
-import org.apartments.Apartment;
-import org.apartments.ApartmentDAO;
-import org.apartments.Database;
-import org.junit.jupiter.api.BeforeEach;
+import apartments.Apartment;
+import apartments.ApartmentDAO;
+import apartments.ApartmentsDatabase;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,8 +17,8 @@ public class TestDb {
     @BeforeEach
     public void setUp() throws Exception {
         // Initialize the database before each test
-        Database.initialize();
-        conn = Database.getConnection();
+        ApartmentsDatabase.initialize();
+        conn = ApartmentsDatabase.getConnection();
     }
 
     @AfterEach
@@ -46,10 +43,11 @@ public class TestDb {
         assertTrue(rs.next(), "The 'apartments' table should exist.");
     }
 
+
     @Test
     public void testInsertData() throws Exception {
         // Insert a test record into the apartments table
-        Apartment apartment = new Apartment( "Apartment 101", "123 Main St", 2, 5);
+        Apartment apartment = new Apartment("Apartment 101", "123 Main St", 2, 5);
         ApartmentDAO.addApartment(apartment);
 
         // Verify if the data was inserted correctly
@@ -64,5 +62,15 @@ public class TestDb {
         List<Apartment> apartments = ApartmentDAO.getAllApartments();
         assertNotNull(apartments, "Apartments list should not be null.");
         assertTrue(!apartments.isEmpty(), "There should be at least one apartment in the list.");
+    }
+
+    @Test
+    public void testDeleteAllApartments() throws Exception {
+        // Delete all apartments from the database
+        ApartmentDAO.removeAllApartments();
+
+        // Verify that the apartments list is empty
+        List<Apartment> apartments = ApartmentDAO.getAllApartments();
+        assertTrue(apartments.isEmpty(), "Apartments list should be empty after deletion.");
     }
 }

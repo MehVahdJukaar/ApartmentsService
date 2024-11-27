@@ -1,2 +1,4 @@
-rootProject.name = 'ApartmentsService'
+rootProject.name = 'microservice-project'
+
+include 'apartment-service', 'booking-service'
 

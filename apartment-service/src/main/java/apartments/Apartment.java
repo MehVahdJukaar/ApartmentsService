@@ -1,4 +1,4 @@
-package org.apartments;
+package apartments;
 
 import java.util.UUID;
 
