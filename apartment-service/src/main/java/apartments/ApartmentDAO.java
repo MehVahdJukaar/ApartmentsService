@@ -35,6 +35,7 @@ public class ApartmentDAO {
     }
 
     // Method to retrieve an apartment by its ID
+    @Nullable
     public static Apartment getApartmentById(UUID id) {
         String sql = "SELECT * FROM apartments WHERE id = ?";
         Apartment apartment = null;

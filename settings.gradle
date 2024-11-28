@@ -1,4 +1,6 @@
 rootProject.name = 'microservice-project'
 
 include 'apartment-service', 'booking-service'
+include 'booking-service:src:main:main'
+findProject(':booking-service:src:main:main')?.name = 'main'
 

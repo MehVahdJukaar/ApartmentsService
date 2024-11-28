@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.*;
 import static spark.Spark.stop;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TestRest {
+public class TestApartmentsRest {
 
     @BeforeAll
     public static void setUp() {
