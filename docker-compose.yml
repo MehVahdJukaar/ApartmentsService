@@ -1,0 +1,15 @@
+version: '3'
+services:
+  apartments-service:
+    build:
+      context: ./apartments-service  # Path to the apartments-service directory
+      dockerfile: Dockerfile         # Use the Dockerfile from apartments-service
+    ports:
+      - "8080:8080"  # Map container's 8080 port to host's 8080 port
+
+  booking-service:
+    build:
+      context: ./booking-service  # Path to the booking-service directory
+      dockerfile: Dockerfile      # Use the Dockerfile from booking-service
+    ports:
+      - "8081:8081"  # Map container's 8081 port to host's 8081 port
