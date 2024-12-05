@@ -9,7 +9,11 @@ public class ApartmentApi {
 
     // Initialize the API
     public static void initialize() {
-        // Setup routes and endpoints
+        // Welcome message
+        get("/", (req, res) -> {
+            res.status(200);  // OK
+            return "Welcome to the Apartments    Microservice!";
+        });
 
         // Endpoint to add a new apartment
         post("/add", (req, res) -> {

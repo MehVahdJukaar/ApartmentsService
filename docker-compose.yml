@@ -13,3 +13,18 @@ services:
       dockerfile: Dockerfile      # Use the Dockerfile from booking-service
     ports:
       - "8081:8081"  # Map container's 8081 port to host's 8081 port
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672" # RabbitMQ Management Interface
+      - "5672:5672"   # RabbitMQ AMQP Protocol Port
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

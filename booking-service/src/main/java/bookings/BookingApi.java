@@ -13,6 +13,13 @@ public class BookingApi {
 
     // Initialize the API
     public static void initialize() {
+
+        // Welcome message
+        get("/", (req, res) -> {
+            res.status(200);  // OK
+            return "Welcome to the Booking Microservice!";
+        });
+
         // Endpoint to add a new booking
         post("/add", (req, res) -> {
             UUID apartmentId;
