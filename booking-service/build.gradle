@@ -1,3 +1,8 @@
+plugins {
+    id 'java' // Apply the Java plugin for all subprojects
+    id 'com.github.johnrengelman.shadow' version "7.1.0" // Use version from gradle.properties
+}
+
 group = project.group
 version = project.version
 

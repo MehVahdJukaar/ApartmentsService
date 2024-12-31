@@ -11,10 +11,9 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral() // Shared repository
 }
-
+//remove this stuff
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
         mavenCentral()

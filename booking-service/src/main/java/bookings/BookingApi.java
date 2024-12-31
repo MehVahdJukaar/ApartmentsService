@@ -13,6 +13,9 @@ public class BookingApi {
 
     // Initialize the API
     public static void initialize() {
+        // Bind the server to 0.0.0.0 to listen on all interfaces
+        port(8081);  // Make sure it's the correct port (8080 in this case)
+        staticFiles.location("/public");  // If you're serving static files
 
         // Welcome message
         get("/", (req, res) -> {
