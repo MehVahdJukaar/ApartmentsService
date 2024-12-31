@@ -2,18 +2,20 @@ version: '3'
 services:
   apartment-service:
     build:
-      context: ./  # Path to the apartments-service directory
-      dockerfile: apartment-service/Dockerfile         # Use the Dockerfile from apartments-service
+      context: ./apartment-service/  # Path to the apartments-service directory
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"  # Map container's 8080 port to host's 8080 port
-
+    depends_on:
+      - rabbitmq
   booking-service:
     build:
-      context: ./  # Path to the booking-service directory
-      dockerfile: booking-service/Dockerfile      # Use the Dockerfile from booking-service
+      context: ./booking-service/  # Path to the booking-service directory
+      dockerfile: Dockerfile
     ports:
       - "8081:8081"  # Map container's 8081 port to host's 8081 port
-
+    depends_on:
+      - rabbitmq
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:

@@ -10,14 +10,14 @@ COPY gradle.properties /app/gradle.properties
 COPY src/main /app/src/main
 
 # Build the jar using Gradle
-RUN gradle build --no-daemon
+RUN ./gradlew shadowJar --no-daemon
 
 FROM openjdk:21-jdk-slim
 
 # Set the working directory
 WORKDIR /app
 
-ARG JAR_NAME="booking-service-1.0"
+ARG JAR_NAME="booking-service-1.0-all"
 # Copy the jar file from the builder stage
 COPY --from=builder /app/build/libs/${JAR_NAME}.jar /app/${JAR_NAME}.jar
 
@@ -25,4 +25,4 @@ COPY --from=builder /app/build/libs/${JAR_NAME}.jar /app/${JAR_NAME}.jar
 EXPOSE 8080
 
 # Run the app
-CMD ["java", "-jar", "booking-service-1.0.jar"]
+CMD ["java", "-jar", "booking-service-1.0-all.jar"]

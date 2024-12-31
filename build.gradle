@@ -2,6 +2,7 @@
 
 plugins {
     id 'java' // Apply the Java plugin for all subprojects
+    id 'com.github.johnrengelman.shadow' version '7.1.0' // Apply the Shadow plugin for all subprojects
 }
 
 group = 'org.example'
@@ -13,6 +14,7 @@ repositories {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
         mavenCentral()
