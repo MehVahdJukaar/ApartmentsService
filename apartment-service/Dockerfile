@@ -1,31 +1,32 @@
-# Use Gradle to build the project
-FROM gradle:7.5-jdk17 as builder
+FROM gradle:7.5-jdk17 AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the Gradle build files
-COPY apartment-service/gradle /app/gradle
-COPY apartment-service/build.gradle /app/build.gradle
-COPY apartment-service/settings.gradle /app/settings.gradle
-
-# Copy the source code
-COPY apartment-service/src /app/src
+# Copy the Gradle build files and source code
+COPY gradle /app/gradle
+COPY gradlew /app/gradlew
+COPY build.gradle /app/build.gradle
+COPY gradle.properties /app/gradle.properties
+COPY src/main /app/src/main
 
 # Build the jar using Gradle
-RUN gradle build --no-daemon
+RUN ./gradlew build --no-daemon
 
-# Use a smaller image for running the app
+
 FROM openjdk:21-jdk-slim
 
 # Set the working directory
 WORKDIR /app
 
+ARG JAR_NAME="apartment-service-1.0"
+# Ensure the JAR_NAME argument matches the actual JAR output name
+ENV JAR_NAME=${JAR_NAME}
+
 # Copy the jar file from the builder stage
-COPY --from=builder /app/build/libs/apartment-service.jar /app/apartment-service.jar
+COPY --from=builder /app/build/libs/${JAR_NAME}.jar /app/${JAR_NAME}.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Command to run the app
-CMD ["java", "-jar", "apartment-service.jar"]
+# Run the app
+CMD ["java", "-jar", "apartment-service-1.0.jar"]

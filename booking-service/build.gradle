@@ -1,3 +1,31 @@
-dependencies {
+plugins {
+    id 'java' // Apply the Java plugin for all subprojects
+}
 
+group = 'bookings'
+version = '1.0'
+
+jar {
+    archiveBaseName.set("booking-service")
+
+    manifest {
+        attributes(
+                'Main-Class': "${archiveBaseName}.${group}.Main"
+        )
+    }
+}
+
+repositories {
+    mavenCentral() // Shared repository
+}
+
+dependencies {
+    annotationProcessor 'org.checkerframework:checker:3.31.0'
+
+    // Add other dependencies here
+    implementation 'org.checkerframework:checker-qual:3.31.0'
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.47.1.0'
+    implementation 'com.sparkjava:spark-core:2.5.4'
+    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.rabbitmq:amqp-client:5.15.0'
 }

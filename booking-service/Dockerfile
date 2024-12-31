@@ -1,31 +1,28 @@
-# Use Gradle to build the project
-FROM gradle:7.5-jdk17 as builder
+FROM gradle:7.5-jdk17 AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the Gradle build files
-COPY booking-service/gradle /app/gradle
-COPY booking-service/build.gradle /app/build.gradle
-COPY booking-service/settings.gradle /app/settings.gradle
-
-# Copy the source code
-COPY booking-service/src /app/src
+# Copy the Gradle build files and source code
+COPY gradle /app/gradle
+COPY gradlew /app/gradlew
+COPY build.gradle /app/build.gradle
+COPY gradle.properties /app/gradle.properties
+COPY src/main /app/src/main
 
 # Build the jar using Gradle
 RUN gradle build --no-daemon
 
-# Use a smaller image for running the app
 FROM openjdk:21-jdk-slim
 
 # Set the working directory
 WORKDIR /app
 
+ARG JAR_NAME="booking-service-1.0"
 # Copy the jar file from the builder stage
-COPY --from=builder /app/build/libs/booking-service.jar /app/booking-service.jar
+COPY --from=builder /app/build/libs/${JAR_NAME}.jar /app/${JAR_NAME}.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Command to run the app
-CMD ["java", "-jar", "booking-service.jar"]
+# Run the app
+CMD ["java", "-jar", "booking-service-1.0.jar"]

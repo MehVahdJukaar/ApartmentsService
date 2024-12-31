@@ -1,4 +1,4 @@
-package apartments;
+package bookings;
 
 import com.rabbitmq.client.*;
 
@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class ApartmentsMQService {
-    private static final String MY_QUEUE_NAME = "apartments_queue";
-    private static final String MY_EXCHANGE = "apartments_exchange";
+public class BookingMQService {
+    private static final String MY_QUEUE_NAME = "bookings_queue";
+    private static final String MY_EXCHANGE = "bookings_exchange";
 
-    private static final String BOOKING_EXCHANGE = "booking_exchange";
+    private static final String BOOKING_EXCHANGE = "apartments_exchange";
 
     // Connection and channel objects for interacting with RabbitMQ
     private static Connection connection;
@@ -34,7 +34,7 @@ public class ApartmentsMQService {
 
             // Define callback
 
-            channel.basicConsume(MY_QUEUE_NAME, true, ApartmentsMQService::onMessageReceived,
+            channel.basicConsume(MY_QUEUE_NAME, true, BookingMQService::onMessageReceived,
                     consumerTag -> {
                         System.out.println("Consumer '" + consumerTag + "' has been canceled.");
                     });
@@ -55,23 +55,11 @@ public class ApartmentsMQService {
         }
     }
 
-    public static Connection getConnection() {
-        return connection;
-    }
-
-    public static void closeConnection() {
-        try {
-            connection.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to close connection", e);
-        }
-    }
 
     // impl
 
     private static void onMessageReceived(String s, Delivery delivery) {
         System.out.println(" [x] Received: '" + new String(delivery.getBody(), StandardCharsets.UTF_8) + "'");
     }
-
 
 }
