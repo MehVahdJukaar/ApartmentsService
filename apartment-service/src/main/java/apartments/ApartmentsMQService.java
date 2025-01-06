@@ -1,6 +1,10 @@
 package apartments;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.*;
+import messages.ApartmentAddedMessage;
+import messages.ApartmentRemovedMessage;
+import messages.Message;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,16 +14,19 @@ public class ApartmentsMQService {
     private static final String MY_QUEUE_NAME = "apartments_queue";
     private static final String MY_EXCHANGE = "apartments_exchange";
     private static final String BOOKING_EXCHANGE = "booking_exchange";
+    private static final String RABBITMQ_HOST = "rabbitmq"; // Name of the RabbitMQ container in the docker-compose file
 
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY_MS = 5000; // 5 seconds
+    private static final Gson GSON = new Gson();
+
     private static Connection connection;
     private static Channel channel;
 
     public static void initialize() {
         // Create a connection to the RabbitMQ server
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("rabbitmq");
+        factory.setHost(RABBITMQ_HOST);
 
         int attempt = 0;
         boolean connected = false;
@@ -67,16 +74,6 @@ public class ApartmentsMQService {
         }
     }
 
-    public static void publishMessage(String message) {
-        try {
-            // Publish the message to the exchange
-            channel.basicPublish(MY_EXCHANGE, "", null, message.getBytes(StandardCharsets.UTF_8));
-            System.out.println(" [x] Sent: '" + message + "'");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to publish message", e);
-        }
-    }
-
     public static Connection getConnection() {
         return connection;
     }
@@ -92,8 +89,35 @@ public class ApartmentsMQService {
         }
     }
 
-    private static void onMessageReceived(String consumerTag, Delivery delivery) {
-        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        System.out.println(" [x] Received: '" + message + "'");
+    public static void publishMessage(Message message) {
+        try {
+            String jsonMessage = message.serialize(); // Use the Message interface to serialize
+            channel.basicPublish(MY_EXCHANGE, "", null,
+                    jsonMessage.getBytes(StandardCharsets.UTF_8));
+            System.out.println(" [x] Sent: " + jsonMessage);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to publish message", e);
+        }
     }
+
+    private static void onMessageReceived(String consumerTag, Delivery delivery) {
+        String jsonMessage = new String(delivery.getBody(), StandardCharsets.UTF_8);
+        System.out.println(" [x] Received: " + jsonMessage);
+
+        try {
+            // Deserialize the message using the Message interface
+            Message message = Message.deserialize(jsonMessage);
+
+            if (message instanceof ApartmentAddedMessage added) {
+                System.out.println("Apartment added: " + added.apartmentId() + " at " + added.location());
+            } else if (message instanceof ApartmentRemovedMessage removed) {
+                System.out.println("Apartment removed: " + removed.apartmentId());
+            } else {
+                System.out.println("Unhandled message type: " + message.getClass().getName());
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to process message: " + e.getMessage());
+        }
+    }
+
 }
