@@ -20,10 +20,10 @@ public abstract class SimpleRabbitMQService {
     private final Connection connection;
     private final Channel channel;
 
-    protected final String myQueue;
+    protected final String name;
 
-    public SimpleRabbitMQService(String myQueue) {
-        this.myQueue = myQueue;
+    public SimpleRabbitMQService(String name) {
+        this.name = name;
         System.out.println("Initializing RabbitMQ connection...");
         // Create a connection to the RabbitMQ server
         ConnectionFactory factory = new ConnectionFactory();
@@ -49,7 +49,7 @@ public abstract class SimpleRabbitMQService {
                 setupChannel(channel);
 
                 // Listen to incoming messages
-                channel.basicConsume(this.myQueue, true, this::onMessageReceived,
+                channel.basicConsume(this.name, true, this::onMessageReceived,
                         consumerTag -> System.out.println("Consumer '" + consumerTag + "' has been canceled."));
 
                 connected = true;  // Set flag to true if successful connection
@@ -79,13 +79,13 @@ public abstract class SimpleRabbitMQService {
 
     public void setupChannel(Channel channel) throws IOException {
         // Declare a queue to receive messages
-        channel.queueDeclare(myQueue, true, false, false, null);
+        channel.queueDeclare(name, true, false, false, null);
 
         // All services have 1 fanout exchange
         channel.exchangeDeclare(GLOBAL_EXCHANGE, BuiltinExchangeType.FANOUT, true);
 
         // Binds my queue to the exchange
-        channel.queueBind(myQueue, GLOBAL_EXCHANGE, "");
+        channel.queueBind(name, GLOBAL_EXCHANGE, "");
     }
 
     public Connection getConnection() {
@@ -106,7 +106,11 @@ public abstract class SimpleRabbitMQService {
     public void publishMessage(Message message) {
         try {
             String jsonMessage = message.serialize(); // Use the Message interface to serialize
-            channel.basicPublish(GLOBAL_EXCHANGE, "", null,
+
+            AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+                    .appId(name)
+                    .build();
+            channel.basicPublish(GLOBAL_EXCHANGE, "", props,
                     jsonMessage.getBytes(StandardCharsets.UTF_8));
             System.out.println(" [x] Sent: " + jsonMessage);
         } catch (IOException e) {
@@ -115,6 +119,9 @@ public abstract class SimpleRabbitMQService {
     }
 
     private void onMessageReceived(String consumerTag, Delivery delivery) {
+        if (delivery.getProperties().getAppId().equals(name)) {
+            return;  // Ignore messages sent by this service
+        }
         String jsonMessage = new String(delivery.getBody(), StandardCharsets.UTF_8);
         System.out.println(" [x] Received: " + jsonMessage);
         try {

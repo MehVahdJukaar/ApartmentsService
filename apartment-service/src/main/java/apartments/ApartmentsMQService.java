@@ -1,20 +1,18 @@
 package apartments;
 
-import com.rabbitmq.client.*;
 import messages.ApartmentAddedMessage;
 import messages.ApartmentRemovedMessage;
 import messages.Message;
 import messages.SimpleRabbitMQService;
 
-import java.io.IOException;
-
 public class ApartmentsMQService extends SimpleRabbitMQService {
     public static final ApartmentsMQService INSTANCE = new ApartmentsMQService();
 
-    public static void initialize(){}
+    public static void initialize() {
+    }
 
     ApartmentsMQService() {
-        super("apartments_queue");
+        super("apartments");
     }
 
     @Override

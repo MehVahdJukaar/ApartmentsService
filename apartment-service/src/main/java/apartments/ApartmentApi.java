@@ -17,7 +17,7 @@ public class ApartmentApi {
         // Welcome message
         get("/", (req, res) -> {
             res.status(200);  // OK
-            return "Welcome to the Apartments    Microservice!" + ApartmentsMQService.lastMessage;
+            return "Welcome to the Apartments Microservice!" + ApartmentsMQService.lastMessage;
         });
 
         // Endpoint to add a new apartment
