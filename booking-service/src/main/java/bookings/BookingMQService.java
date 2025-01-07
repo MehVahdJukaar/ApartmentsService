@@ -1,4 +1,4 @@
-package booking;
+package bookings;
 
 import com.rabbitmq.client.*;
 
@@ -9,7 +9,7 @@ import java.util.concurrent.TimeoutException;
 public class BookingMQService {
     private static final String MY_QUEUE_NAME = "bookings_queue";
     private static final String MY_EXCHANGE = "bookings_exchange";
-    private static final String BOOKING_EXCHANGE = "booking_exchange";
+    private static final String BOOKING_EXCHANGE = "apartments_exchange";
 
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY_MS = 5000; // 5 seconds
@@ -38,6 +38,8 @@ public class BookingMQService {
 
                 // Declare an exchange to send messages
                 channel.exchangeDeclare(MY_EXCHANGE, BuiltinExchangeType.DIRECT, true);
+                // Also declare the booking exchange
+                channel.exchangeDeclare(BOOKING_EXCHANGE, BuiltinExchangeType.DIRECT, true);
 
                 // Bind the queue to the booking exchange
                 channel.queueBind(MY_QUEUE_NAME, BOOKING_EXCHANGE, "");

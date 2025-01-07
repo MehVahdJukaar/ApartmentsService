@@ -18,7 +18,6 @@ public class ApartmentsMQService {
 
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY_MS = 5000; // 5 seconds
-    private static final Gson GSON = new Gson();
 
     private static Connection connection;
     private static Channel channel;
@@ -43,9 +42,12 @@ public class ApartmentsMQService {
 
                 // Declare an exchange to send messages
                 channel.exchangeDeclare(MY_EXCHANGE, BuiltinExchangeType.DIRECT, true);
+                // Also declare the booking exchange
+                channel.exchangeDeclare(BOOKING_EXCHANGE, BuiltinExchangeType.DIRECT, true);
 
                 // Bind the queue to the booking exchange
                 channel.queueBind(MY_QUEUE_NAME, BOOKING_EXCHANGE, "");
+
 
                 // Log successful connection
                 System.out.println("RabbitMQ connection established!");
@@ -100,10 +102,11 @@ public class ApartmentsMQService {
         }
     }
 
+    public static String LAST_MESSAGE = "";
     private static void onMessageReceived(String consumerTag, Delivery delivery) {
         String jsonMessage = new String(delivery.getBody(), StandardCharsets.UTF_8);
         System.out.println(" [x] Received: " + jsonMessage);
-
+        LAST_MESSAGE = jsonMessage;
         try {
             // Deserialize the message using the Message interface
             Message message = Message.deserialize(jsonMessage);
