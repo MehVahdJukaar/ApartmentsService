@@ -165,13 +165,12 @@ public class BookingDAO {
     }
 
     public static void addApartment(UUID apartmentId, String name) {
-        String insertApartmentQuery = "INSERT OR IGNORE INTO apartments (id) VALUES (?);";
+        String insertApartmentQuery = "INSERT OR IGNORE INTO apartments (id, name) VALUES (?, ?);";
         try (Connection conn = BookingDatabase.getConnection();
              PreparedStatement stmt = conn.prepareStatement(insertApartmentQuery)) {
-            stmt.setString(1, apartmentId.toString()); // Convert UUID to string
+            stmt.setString(1, apartmentId.toString());
             stmt.setString(2, name);
-            stmt.addBatch();
-            stmt.executeBatch();
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

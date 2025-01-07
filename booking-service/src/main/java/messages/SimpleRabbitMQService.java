@@ -130,7 +130,8 @@ public abstract class SimpleRabbitMQService {
 
             onMessageReceived(message);
         } catch (Exception e) {
-            System.err.println("Failed to process message: " + e.getMessage());
+            System.err.println("Failed to process message: "+ jsonMessage);
+            e.printStackTrace();
         }
     }
 
