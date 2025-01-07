@@ -44,6 +44,7 @@ public class BookingApi {
             boolean success = BookingDAO.addBooking(booking);
 
             if (success) {
+                BookingMQService.publishBookingAdded(booking);
                 res.status(201);  // Created
                 return booking.id();
             } else {
@@ -64,6 +65,7 @@ public class BookingApi {
 
             boolean success = BookingDAO.cancelBooking(bookingId);
             if (success) {
+                BookingMQService.publishBookingCancelled(bookingId);
                 res.status(200);  // OK
                 return "Booking canceled successfully!";
             } else {
@@ -89,6 +91,7 @@ public class BookingApi {
 
             boolean success = BookingDAO.changeBookingDates(bookingId, fromDate, toDate);
             if (success) {
+                BookingMQService.publishBookingChanged(bookingId, fromDate, toDate);
                 res.status(200);  // OK
                 return "Booking changed successfully!";
             } else {

@@ -1,9 +1,9 @@
 package bookings;
 
-import messages.ApartmentAddedMessage;
-import messages.ApartmentRemovedMessage;
-import messages.Message;
-import messages.SimpleRabbitMQService;
+import messages.*;
+
+import java.sql.Date;
+import java.util.UUID;
 
 public class BookingMQService extends SimpleRabbitMQService {
 
@@ -27,6 +27,18 @@ public class BookingMQService extends SimpleRabbitMQService {
         } else {
             System.out.println("Unhandled message type: " + message.getClass().getName());
         }
+    }
+
+    public static void publishBookingAdded(Booking booking){
+        INSTANCE.publishMessage(new BookingAddedMessage(booking.id(), booking.apartmentID(), booking.fromDate(), booking.toDate(), booking.who()));
+    }
+
+    public static void publishBookingChanged(UUID bookingId, Date fromDate, Date toDate){
+        INSTANCE.publishMessage(new BookingChangedMessage(bookingId, fromDate, toDate));
+    }
+
+    public static void publishBookingCancelled(UUID bookingId){
+        INSTANCE.publishMessage(new BookingCancelledMessage(bookingId));
     }
 
 }

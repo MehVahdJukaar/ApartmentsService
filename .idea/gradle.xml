@@ -11,6 +11,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/apartment-service" />
             <option value="$PROJECT_DIR$/booking-service" />
+            <option value="$PROJECT_DIR$/web-tester" />
+            <option value="$PROJECT_DIR$/web-tester/src" />
           </set>
         </option>
       </GradleProjectSettings>

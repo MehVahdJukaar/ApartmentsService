@@ -12,6 +12,9 @@ public interface Message {
     Map<String, Class<? extends Message>> MESSAGE_REGISTRY = Map.of(
             "ApartmentAdded", ApartmentAddedMessage.class,
             "ApartmentRemoved", ApartmentRemovedMessage.class,
+            "BookingChanged", BookingChangedMessage.class,
+            "BookingCancelled", BookingCancelledMessage.class,
+            "BookingAdded", BookingAddedMessage.class,
             "String", StringMessage.class
     );
 
