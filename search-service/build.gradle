@@ -1,0 +1,37 @@
+plugins {
+    id 'java' // Apply the Java plugin for all subprojects
+    id 'com.github.johnrengelman.shadow' version "7.1.0" // Use version from gradle.properties
+}
+
+group = project.group
+version = project.version
+
+jar {
+    archiveBaseName.set(project.archiveBaseName) // Use the base name from gradle.properties
+
+    manifest {
+        attributes(
+                'Main-Class': project.mainClass  // Use the main class from gradle.properties
+        )
+    }
+}
+
+repositories {
+    mavenCentral() // Shared repository
+}
+
+dependencies {
+    annotationProcessor "org.checkerframework:checker:3.31.0"
+    implementation "org.checkerframework:checker-qual:3.31.0"
+    implementation "org.xerial:sqlite-jdbc:${project.sqliteVersion}" // SQLite dependency with version from gradle.properties
+    implementation "com.sparkjava:spark-core:${project.sparkVersion}" // Spark framework with version from gradle.properties
+    implementation "com.google.code.gson:gson:${project.gsonVersion}" // Gson with version from gradle.properties
+    implementation "com.rabbitmq:amqp-client:${project.rabbitmqVersion}" // RabbitMQ client with version from gradle.properties
+}
+
+// Use shadow plugin to bundle all dependencies into a fat JAR
+shadowJar {
+    archiveBaseName.set(project.archiveBaseName) // Use the base name from gradle.properties
+    archiveVersion.set(project.version)
+    mergeServiceFiles() // Merge service files in case of conflicts
+}

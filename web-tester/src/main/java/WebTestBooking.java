@@ -5,7 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
 
-public class TestBooking {
+public class WebTestBooking {
 
     private static final String BASE_URL = "http://localhost:8081";
 
