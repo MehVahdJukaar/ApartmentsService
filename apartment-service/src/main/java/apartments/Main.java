@@ -1,6 +1,5 @@
 package apartments;
 
-import messages.SimpleRabbitMQService;
 import messages.StringMessage;
 
 public class Main {

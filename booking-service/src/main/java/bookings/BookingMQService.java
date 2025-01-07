@@ -24,8 +24,6 @@ public class BookingMQService extends SimpleRabbitMQService {
         } else if (message instanceof ApartmentRemovedMessage removed) {
             BookingDAO.removeApartment(removed.apartmentId());
             System.out.println("Apartment removed: " + removed.apartmentId());
-        } else {
-            System.out.println("Unhandled message type: " + message.getClass().getName());
         }
     }
 

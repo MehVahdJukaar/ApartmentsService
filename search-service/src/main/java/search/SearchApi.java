@@ -10,7 +10,7 @@ public class SearchApi {
     // Initialize the API
     public static void initialize() {
         ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(8080);
+        port(8082);
 
         // Welcome message
         get("/", (req, res) -> {

@@ -29,7 +29,7 @@ public class SearchDatabase {
                     "id TEXT PRIMARY KEY," +
                     "apartment_id TEXT NOT NULL," +
                     "from_date DATE NOT NULL," +
-                    "to_date DATE NOT NULL,"+
+                    "to_date DATE NOT NULL"+
                     ");";
 
             // Create the apartments table

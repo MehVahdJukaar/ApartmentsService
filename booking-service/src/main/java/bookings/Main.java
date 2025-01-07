@@ -5,12 +5,12 @@ import messages.StringMessage;
 public class Main {
 
     public static void main(String[] args) {
+        System.out.println("Initializing Bookings...");
 
         // Initialize the database (create the table if it doesn't exist)
         BookingDatabase.initialize();
         BookingApi.initialize();
         BookingMQService.initialize();
-
 
         // Publish a message to the MQ as an example
         BookingMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));

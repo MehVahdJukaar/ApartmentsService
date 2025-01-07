@@ -7,6 +7,6 @@ public record BookingAddedMessage(UUID id, UUID apartmentID, Date fromDate, Date
 
     @Override
     public String getEventType() {
-        return "bookingAdded";
+        return "BookingAdded";
     }
 }

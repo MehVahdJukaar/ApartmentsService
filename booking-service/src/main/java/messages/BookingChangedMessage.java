@@ -7,6 +7,6 @@ public record BookingChangedMessage(UUID id, Date fromDate, Date toDate) impleme
 
     @Override
     public String getEventType() {
-        return "bookingChanged";
+        return "BookingChanged";
     }
 }

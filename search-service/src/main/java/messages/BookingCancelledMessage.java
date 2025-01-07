@@ -6,6 +6,6 @@ public record BookingCancelledMessage(UUID id) implements Message {
 
     @Override
     public String getEventType() {
-        return "bookingCancelled";
+        return "BookingCancelled";
     }
 }

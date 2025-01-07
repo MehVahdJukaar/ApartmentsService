@@ -6,6 +6,6 @@ public record ApartmentAddedMessage(UUID id, String name, String address, int no
 
     @Override
     public String getEventType() {
-        return "apartmentAdded";
+        return "ApartmentAdded";
     }
 }

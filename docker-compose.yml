@@ -20,6 +20,16 @@ services:
       - rabbitmq
     networks:
       - app-network
+  search-service:
+    build:
+      context: ./search-service/  # Path to the search-service directory
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"  # Map container's 8081 port to host's 8081 port
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:
