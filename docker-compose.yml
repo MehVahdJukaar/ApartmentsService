@@ -23,7 +23,7 @@ services:
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:
-      - "15673:15673" # RabbitMQ Management Interface
+      - "15673:15672" # RabbitMQ Management Interface
       - "5672:5672"   # RabbitMQ AMQP Protocol Port
     environment:
       RABBITMQ_DEFAULT_USER: user

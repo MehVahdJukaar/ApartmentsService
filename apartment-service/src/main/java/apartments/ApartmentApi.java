@@ -1,5 +1,7 @@
 package apartments;
 
+import messages.SimpleRabbitMQService;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +17,7 @@ public class ApartmentApi {
         // Welcome message
         get("/", (req, res) -> {
             res.status(200);  // OK
-            return "Welcome to the Apartments    Microservice!" + ApartmentsMQService.LAST_MESSAGE;
+            return "Welcome to the Apartments    Microservice!" + ApartmentsMQService.lastMessage;
         });
 
         // Endpoint to add a new apartment

@@ -1,10 +1,13 @@
 package apartments;
 
+import messages.SimpleRabbitMQService;
 import messages.StringMessage;
 
 public class Main {
 
     public static void main(String[] args) {
+        System.out.println("Initializing Apartments...");
+
         // Initialize the database (create the table if it doesn't exist)
         ApartmentsDatabase.initialize();
         ApartmentApi.initialize();
@@ -15,7 +18,7 @@ public class Main {
         ApartmentDAO.addApartment(new Apartment("Apartment 2", "345 Main St", 0, -1));
 
         // Publish a message to the MQ as an example
-        ApartmentsMQService.publishMessage(new StringMessage("Hello, World From Apartments!"));
+        ApartmentsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Apartments!"));
 
         // Keep the application running until manually shut down
         // Here, we can wait for a specific signal or use a simple mechanism

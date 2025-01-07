@@ -1,6 +1,6 @@
 package bookings;
 
-import java.util.UUID;
+import messages.StringMessage;
 
 public class Main {
 
@@ -13,7 +13,7 @@ public class Main {
 
 
         // Publish a message to the MQ as an example
-        BookingMQService.publishMessage("Hello, World From Bookings!");
+        BookingMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));
 
         // Keep the application running until manually shut down
         // Here, we can wait for a specific signal or use a simple mechanism
