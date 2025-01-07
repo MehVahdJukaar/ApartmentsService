@@ -1,10 +1,8 @@
 package messages;
 
-public record ApartmentRemovedMessage(String eventType, String apartmentId) implements Message {
-    public ApartmentRemovedMessage(String apartmentId) {
-        this("ApartmentRemoved", apartmentId);
-    }
+import java.util.UUID;
 
+public record ApartmentRemovedMessage(UUID apartmentId) implements Message {
     @Override
     public String getEventType() {
         return "apartmentRemoved";

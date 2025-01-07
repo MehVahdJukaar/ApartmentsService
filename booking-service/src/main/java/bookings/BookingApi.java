@@ -47,7 +47,7 @@ public class BookingApi {
                 res.status(201);  // Created
                 return booking.id();
             } else {
-                res.status(400);  // Bad Request
+                res.status(404);  // Bad Request
                 return "Failed to add booking!";
             }
         });

@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class BookingsDatabase {
+public class BookingDatabase {
     private static final String DB_PATH = System.getenv("BOOKING_DB_PATH") != null ?
             System.getenv("BOOKING_DB_PATH") : "bookings.db";
 
@@ -23,14 +23,24 @@ public class BookingsDatabase {
     public static void initialize() {
         try (Connection conn = getConnection(); // This line ensures the connection is open
              Statement stmt = conn.createStatement()) {
-            String createTableQuery = "CREATE TABLE IF NOT EXISTS bookings (" +
+
+            // Create the bookings table
+            String createBookingsTableQuery = "CREATE TABLE IF NOT EXISTS bookings (" +
                     "id TEXT PRIMARY KEY," +
                     "apartment_id TEXT NOT NULL," +
                     "from_date DATE NOT NULL," +
                     "to_date DATE NOT NULL," +
                     "who TEXT NOT NULL" +
                     ");";
-            stmt.execute(createTableQuery);
+
+            // Create the apartments table
+            String createApartmentsTableQuery = "CREATE TABLE IF NOT EXISTS apartments (" +
+                    "id TEXT PRIMARY KEY," +
+                    "apartment_name TEXT NOT NULL" +  // Add more fields as needed
+                    ");";
+
+            stmt.execute(createBookingsTableQuery);
+            stmt.execute(createApartmentsTableQuery);
         } catch (SQLException e) {
             e.printStackTrace();
         }

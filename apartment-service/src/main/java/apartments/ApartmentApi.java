@@ -1,7 +1,5 @@
 package apartments;
 
-import messages.SimpleRabbitMQService;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +15,7 @@ public class ApartmentApi {
         // Welcome message
         get("/", (req, res) -> {
             res.status(200);  // OK
-            return "Welcome to the Apartments Microservice!" + ApartmentsMQService.lastMessage;
+            return "Welcome to the Apartments Microservice!";
         });
 
         // Endpoint to add a new apartment
@@ -31,6 +29,7 @@ public class ApartmentApi {
             boolean success = ApartmentDAO.addApartment(apartment);
 
             if (success) {
+                ApartmentsMQService.publishApartmentAdded(apartment);
                 res.status(201);  // Set HTTP response code as "Created"
                 return apartment.id().toString(); // Return the UUID
             } else {
@@ -51,6 +50,7 @@ public class ApartmentApi {
 
             boolean success = ApartmentDAO.removeApartmentById(apartmentId);
             if (success) {
+                ApartmentsMQService.publishApartmentRemoved(apartmentId);
                 res.status(200);  // OK
                 return "Apartment removed successfully!";
             } else {

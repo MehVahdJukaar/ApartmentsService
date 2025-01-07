@@ -1,9 +1,10 @@
 package apartments;
 
 import messages.ApartmentAddedMessage;
-import messages.ApartmentRemovedMessage;
 import messages.Message;
 import messages.SimpleRabbitMQService;
+
+import java.util.UUID;
 
 public class ApartmentsMQService extends SimpleRabbitMQService {
     public static final ApartmentsMQService INSTANCE = new ApartmentsMQService();
@@ -17,17 +18,15 @@ public class ApartmentsMQService extends SimpleRabbitMQService {
 
     @Override
     public void onMessageReceived(Message message) {
-        if (message instanceof ApartmentAddedMessage added) {
-            System.out.println("Apartment added: " + added.apartmentId() + " at " + added.location());
-        } else if (message instanceof ApartmentRemovedMessage removed) {
-            System.out.println("Apartment removed: " + removed.apartmentId());
-        } else {
-            System.out.println("Unhandled message type: " + message.getClass().getName());
-        }
 
-        lastMessage = message.serialize();
     }
 
-    public static String lastMessage = null;
+    public static void publishApartmentAdded(Apartment apartment) {
+        INSTANCE.publishMessage(new ApartmentAddedMessage(
+                apartment.id(),apartment.name(),  apartment.address(), apartment.noiseLevel(), apartment.floor()));
+    }
 
+    public static void publishApartmentRemoved(UUID apartmentId) {
+        INSTANCE.publishMessage(new messages.ApartmentRemovedMessage(apartmentId));
+    }
 }

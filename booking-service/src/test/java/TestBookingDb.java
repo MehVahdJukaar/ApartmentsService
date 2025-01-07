@@ -1,6 +1,6 @@
 import bookings.Booking;
 import bookings.BookingDAO;
-import bookings.BookingsDatabase;
+import bookings.BookingDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +19,8 @@ public class TestBookingDb {
     @BeforeEach
     public void setUp() throws Exception {
         // Initialize the database before each test
-        BookingsDatabase.initialize();
-        conn = BookingsDatabase.getConnection();
+        BookingDatabase.initialize();
+        conn = BookingDatabase.getConnection();
     }
 
     @AfterEach

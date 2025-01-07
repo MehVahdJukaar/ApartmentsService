@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
 
         // Initialize the database (create the table if it doesn't exist)
-        BookingsDatabase.initialize();
+        BookingDatabase.initialize();
         BookingApi.initialize();
         BookingMQService.initialize();
 

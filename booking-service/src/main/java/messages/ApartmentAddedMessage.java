@@ -1,9 +1,8 @@
 package messages;
 
-public record ApartmentAddedMessage(String eventType, String apartmentId, String location) implements Message {
-    public ApartmentAddedMessage(String apartmentId, String location) {
-        this("ApartmentAdded", apartmentId, location);
-    }
+import java.util.UUID;
+
+public record ApartmentAddedMessage(UUID id, String name, String address, int noiseLevel, int floor) implements Message {
 
     @Override
     public String getEventType() {

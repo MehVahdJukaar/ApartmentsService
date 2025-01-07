@@ -19,8 +19,10 @@ public class BookingMQService extends SimpleRabbitMQService {
     @Override
     public void onMessageReceived(Message message) {
         if (message instanceof ApartmentAddedMessage added) {
-            System.out.println("Apartment added: " + added.apartmentId() + " at " + added.location());
+            BookingDAO.addApartment(added.id(), added.name());
+            System.out.println("Apartment added: " + added.name() + " at " + added.address());
         } else if (message instanceof ApartmentRemovedMessage removed) {
+            BookingDAO.removeApartment(removed.apartmentId());
             System.out.println("Apartment removed: " + removed.apartmentId());
         } else {
             System.out.println("Unhandled message type: " + message.getClass().getName());
