@@ -84,20 +84,25 @@ public class GatewayApi {
         });
     }
 
-    // Method to forward the request to localhost:8080
     private static String forwardRequest(int port, Request req, Response res) {
         String method = req.requestMethod();
-        String uri = "http://localhost:" + port;
+        String uri = "http://localhost:" + port + req.uri(); // Append the original URI path
 
         try {
             // Convert Spark headers (Set) to a Map for Unirest
             Map<String, String> headers = convertHeaders(req);
 
-            // Use Unirest to forward the request
-            HttpResponse<String> response = Unirest.request(method, uri)
-                    .body(req.body())
-                    .headers(headers)
-                    .asString();
+            // Prepare the Unirest request
+            var request = Unirest.request(method, uri)
+                    .headers(headers);
+
+            // Only add a body if the method supports it
+            if (!method.equalsIgnoreCase("GET") && !method.equalsIgnoreCase("DELETE")) {
+                request.body(req.body());
+            }
+
+            // Execute the request
+            HttpResponse<String> response = request.asString();
 
             // Set the response from localhost:8080 to the original request
             res.status(response.getStatus());
@@ -111,6 +116,7 @@ public class GatewayApi {
             return "Error forwarding request: " + e.getMessage();
         }
     }
+
 
     // Helper method to convert Spark headers (Set) to a Map for Unirest
     private static Map<String, String> convertHeaders(spark.Request req) {

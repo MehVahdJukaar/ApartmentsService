@@ -50,7 +50,7 @@ public class Main {
     }
 
     public static void fetchApartmentsDirectly() {
-        HttpResponse<String> response = Unirest.get("localhost:" + Ports.APARTMENT_PORT + "/list")
+        HttpResponse<String> response = Unirest.get(Ports.APARTMENT_HOST + "/list")
                 .asString();
 
         if (response.isSuccess()) {
@@ -72,7 +72,7 @@ public class Main {
     }
 
     public static void fetchBookingsDirectly() {
-        HttpResponse<String> response = Unirest.get("localhost:" + Ports.BOOKING_PORT + "/list")
+        HttpResponse<String> response = Unirest.get(Ports.BOOKING_HOST + "/list")
                 .asString();
 
         if (response.isSuccess()) {
