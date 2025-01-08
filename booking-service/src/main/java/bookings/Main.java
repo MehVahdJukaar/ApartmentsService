@@ -25,7 +25,7 @@ public class Main {
 
 
         try {
-            Thread.sleep(1000);  // Sleep for a short time so other services can start
+            Thread.sleep(10000);  // Sleep for a short time so other services can start
             if (BookingDAO.listApartments().isEmpty()) {
                 fetchApartmentsDirectly();
             }

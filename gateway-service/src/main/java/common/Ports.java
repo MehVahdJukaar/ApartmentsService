@@ -14,8 +14,8 @@ public class Ports {
     public static final int GATEWAY_PORT = System.getenv("GATEWAY_PORT") != null ?
             Integer.parseInt(System.getenv("GATEWAY_PORT")) : 8083;
 
-    public static final String APARTMENT_HOST = "apartment-service:" + APARTMENT_PORT;
-    public static final String BOOKING_HOST = "booking-service:" + BOOKING_PORT;
-    public static final String SEARCH_HOST = "search-service:" + SEARCH_PORT;
-    public static final String GATEWAY_HOST = "gateway-service:" + GATEWAY_PORT;
+    public static final String APARTMENT_HOST = "apartment-service";
+    public static final String BOOKING_HOST = "booking-service:8081";
+    public static final String SEARCH_HOST = "search-service";
+    public static final String GATEWAY_HOST = "gateway-service";
 }

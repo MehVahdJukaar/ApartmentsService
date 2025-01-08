@@ -1,131 +1,96 @@
 package gateway;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import common.Ports;
+import kong.unirest.Header;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
-import spark.Request;
-import spark.Response;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.Map;
-
-import static spark.Spark.*;
+import java.util.stream.Collectors;
 
 public class GatewayApi {
 
-    // Initialize the API
-    public static void initialize() {
-        ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(Ports.GATEWAY_PORT);
+    public static void initialize() throws IOException {
+        int port = (Ports.GATEWAY_PORT);
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        // Welcome message
-        get("/", (req, res) -> {
-            res.status(200);  // OK
-            return "Welcome to the Gateway Microservice!";
-        });
-
-        // Forward any /apartments/* call to the apartments service
-        path("/apartments", () -> {
-            before("/*", (req, res) -> forwardRequest(Ports.APARTMENT_PORT, req, res));
+        // Welcome route
+        server.createContext("/", exchange -> {
+            if ("GET".equals(exchange.getRequestMethod())) {
+                sendResponse(exchange, 200, "Welcome to the Gateway Microservice!");
+            } else {
+                sendResponse(exchange, 405, "Method Not Allowed");
+            }
         });
 
-        // Forward any /bookings/* call to the bookings service
-        path("/bookings", () -> {
-            before("/*", (req, res) -> forwardRequest(Ports.BOOKING_PORT, req, res));
-        });
+        // Bookings route
+        server.createContext("/bookings/", new ForwardingHandler(Ports.BOOKING_HOST));
 
-        // Forward any /search/* call to the search service
-        path("/search", () -> {
-            before("/*", (req, res) -> forwardRequest(Ports.SEARCH_PORT, req, res));
-        });
+        // Apartments route
+        server.createContext("/apartments/", new ForwardingHandler(Ports.APARTMENT_HOST));
 
-        // Search endpoint
-        get("/search", (req, res) -> {
-            //forward to search service
-            return forwardRequest(Ports.SEARCH_PORT, req, res);
-        });
-        // Apartment endpoint
-        post("/add", (req, res) -> {
-            //forward to apartment service
-            return forwardRequest(Ports.APARTMENT_PORT, req, res);
-        });
-        delete("/remove", (req, res) -> {
-            //forward to apartment service
-            return forwardRequest(Ports.APARTMENT_PORT, req, res);
-        });
-        get("/list", (req, res) -> {
-            //forward to apartment service
-            return forwardRequest(Ports.APARTMENT_PORT, req, res);
-        });
-        delete("/remove_all", (req, res) -> {
-            //forward to apartment service
-            return forwardRequest(Ports.APARTMENT_PORT, req, res);
-        });
-        // Booking endpoint
-        post("/add", (req, res) -> {
-            //forward to booking service
-            return forwardRequest(Ports.BOOKING_PORT, req, res);
-        });
-        delete("/cancel", (req, res) -> {
-            //forward to booking service
-            return forwardRequest(Ports.BOOKING_PORT, req, res);
-        });
-        get("/list", (req, res) -> {
-            //forward to booking service
-            return forwardRequest(Ports.BOOKING_PORT, req, res);
-        });
-        post("/change", (req, res) -> {
-            //forward to booking service
-            return forwardRequest(Ports.BOOKING_PORT, req, res);
-        });
-        delete("/cancel_all", (req, res) -> {
-            //forward to booking service
-            return forwardRequest(Ports.BOOKING_PORT, req, res);
-        });
+        // Search route
+        server.createContext("/search/", new ForwardingHandler(Ports.SEARCH_HOST));
+
+        System.out.println("Gateway server is running on port " + port);
+        server.start();
     }
 
-    private static String forwardRequest(int port, Request req, Response res) {
-        String method = req.requestMethod();
-        String uri = "http://localhost:" + port + req.uri(); // Append the original URI path
-
-        try {
-            // Convert Spark headers (Set) to a Map for Unirest
-            Map<String, String> headers = convertHeaders(req);
-
-            // Prepare the Unirest request
-            var request = Unirest.request(method, uri)
-                    .headers(headers);
-
-            // Only add a body if the method supports it
-            if (!method.equalsIgnoreCase("GET") && !method.equalsIgnoreCase("DELETE")) {
-                request.body(req.body());
-            }
-
-            // Execute the request
-            HttpResponse<String> response = request.asString();
-
-            // Set the response from localhost:8080 to the original request
-            res.status(response.getStatus());
-            for (var header : response.getHeaders().all()) {
-                res.header(header.getName(), header.getValue());
-            }
-            return response.getBody();
-        } catch (Exception e) {
-            res.status(500);
-            e.printStackTrace();
-            return "Error forwarding request: " + e.getMessage();
-        }
+    private static void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
+        exchange.sendResponseHeaders(statusCode, response.getBytes().length);
+        OutputStream os = exchange.getResponseBody();
+        os.write(response.getBytes());
+        os.close();
     }
 
+    private record ForwardingHandler(String host) implements HttpHandler {
 
-    // Helper method to convert Spark headers (Set) to a Map for Unirest
-    private static Map<String, String> convertHeaders(spark.Request req) {
-        Map<String, String> headersMap = new HashMap<>();
-        for (String headerName : req.headers()) {
-            // Spark headers contain multiple values for a single key, so join them with commas
-            String headerValue = String.join(",", req.headers(headerName));
-            headersMap.put(headerName, headerValue);
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String method = exchange.getRequestMethod();
+            String original = exchange.getRequestURI().toString();
+
+            try {
+                String uri = "http://" + host + original.substring(0, original.indexOf("/"));
+                System.out.println("Forwarding request to: " + uri);
+
+                // Extract headers from the incoming request
+                var headers = exchange.getRequestHeaders().entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> String.join(",", entry.getValue())
+                        ));
+
+                // Prepare the Unirest request
+                var request = Unirest.request(method, uri)
+                        .headers(headers);
+
+                // Add request body if necessary
+                if (!"GET".equalsIgnoreCase(method) && !"DELETE".equalsIgnoreCase(method)) {
+                    byte[] bodyBytes = exchange.getRequestBody().readAllBytes();
+                    request.body(new String(bodyBytes));
+                }
+
+                // Execute the request
+                HttpResponse<String> response = request.asString();
+
+                // Forward the response back to the client
+                exchange.getResponseHeaders().putAll(response.getHeaders().all().stream()
+                        .collect(Collectors.groupingBy(
+                                Header::getName,
+                                Collectors.mapping(Header::getValue, Collectors.toList())
+                        )));
+                sendResponse(exchange, response.getStatus(), response.getBody());
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendResponse(exchange, 500, "Error forwarding request: " + e.getMessage());
+            }
         }
-        return headersMap;
     }
 }

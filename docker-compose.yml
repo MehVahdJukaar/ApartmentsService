@@ -2,7 +2,7 @@ version: '3'
 services:
   apartment-service:
     build:
-      context: ./apartment-service/  # Path to the apartments-service directory
+      context: ./apartment-service/  # Path to the apartment-service directory
       dockerfile: Dockerfile
     ports:
       - "8080:8080"  # Map container's 8080 port to host's 8080 port
