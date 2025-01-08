@@ -1,6 +1,6 @@
 package apartments;
 
-import messages.StringMessage;
+import common.StringMessage;
 
 public class Main {
 
@@ -13,9 +13,6 @@ public class Main {
         ApartmentsMQService.initialize();
 
         ApartmentDAO.removeAllApartments();
-        ApartmentDAO.addApartment(new Apartment("Apartment 1", "123 Main St", 1, 1));
-        ApartmentDAO.addApartment(new Apartment("Apartment 2", "345 Main St", 0, -1));
-
         // Publish a message to the MQ as an example
         ApartmentsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Apartments!"));
 

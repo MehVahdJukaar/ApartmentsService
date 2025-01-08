@@ -28,6 +28,7 @@ dependencies {
     implementation "com.google.code.gson:gson:${project.gsonVersion}" // Gson with version from gradle.properties
     implementation "com.rabbitmq:amqp-client:${project.rabbitmqVersion}" // RabbitMQ client with version from gradle.properties
     implementation "com.konghq:unirest-java:${project.unirestVersion}" // Unirest with version from gradle.properties
+
 }
 
 // Use shadow plugin to bundle all dependencies into a fat JAR

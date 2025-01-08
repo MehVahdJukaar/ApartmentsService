@@ -2,6 +2,7 @@ package bookings;
 
 import bookings.Booking;
 import bookings.BookingDAO;
+import common.Ports;
 
 import java.sql.Date;
 import java.util.List;
@@ -14,7 +15,7 @@ public class BookingApi {
     // Initialize the API
     public static void initialize() {
         ipAddress("0.0.0.0");
-        port(8081);
+        port(Ports.BOOKING_PORT);
 
         // Welcome message
         get("/", (req, res) -> {
@@ -48,8 +49,8 @@ public class BookingApi {
                 res.status(201);  // Created
                 return booking.id();
             } else {
-                res.status(404);  // Bad Request
-                return "Failed to add booking!";
+                res.status(404);  // No apartment
+                return "No apartment found for booking!";
             }
         });
 
@@ -106,8 +107,8 @@ public class BookingApi {
             StringBuilder response = new StringBuilder();
 
             if (bookings.isEmpty()) {
-                res.status(404);  // Not Found
-                return "No bookings found!";
+               // res.status(404);  // Not Found
+               // return "No bookings found!";
             }
 
             for (Booking booking : bookings) {
@@ -121,6 +122,13 @@ public class BookingApi {
 
             res.type("text/plain");
             return response.toString();  // Return booking list as plain text
+        });
+
+        // Cancel all
+        delete("/cancel_all", (req, res) -> {
+            BookingDAO.cancelAllBookings();
+            res.status(200);  // OK
+            return "All bookings canceled successfully!";
         });
     }
 }

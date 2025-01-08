@@ -18,6 +18,7 @@ services:
       - "8081:8081"  # Map container's 8081 port to host's 8081 port
     depends_on:
       - rabbitmq
+      - apartment-service
     networks:
       - app-network
   search-service:
@@ -25,9 +26,24 @@ services:
       context: ./search-service/  # Path to the search-service directory
       dockerfile: Dockerfile
     ports:
-      - "8082:8082"  # Map container's 8081 port to host's 8081 port
+      - "8082:8082"  # Map container's 8082 port to host's 8082 port
     depends_on:
       - rabbitmq
+      - apartment-service
+      - booking-service
+    networks:
+      - app-network
+  gateway-service:
+    build:
+      context: ./gateway-service/  # Path to the gateway-service directory
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"  # Map container's 8083 port to host's 8083 port
+    depends_on:
+      - rabbitmq
+      - apartment-service
+      - booking-service
+      - search-service
     networks:
       - app-network
   rabbitmq:

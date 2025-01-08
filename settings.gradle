@@ -1,4 +1,4 @@
 rootProject.name = 'microservice-project'
 
-include 'apartment-service', 'booking-service', 'search-service' , 'web-tester'
+include 'apartment-service', 'booking-service', 'search-service' , 'gateway-service', 'web-tester'
 

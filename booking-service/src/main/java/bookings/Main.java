@@ -1,6 +1,6 @@
 package bookings;
 
-import messages.StringMessage;
+import common.StringMessage;
 
 public class Main {
 
@@ -19,6 +19,10 @@ public class Main {
         // Here, we can wait for a specific signal or use a simple mechanism
         // to keep the app alive (like waiting for the server to be stopped).
 
+        if(BookingDAO.listApartments().isEmpty()){
+            fetchApartmentsDirectly();
+        }
+
 
         System.out.println("Application is running. Press Ctrl+C to stop.");
 
@@ -32,5 +36,12 @@ public class Main {
                 break;
             }
         }
+    }
+
+    public static void fetchApartmentsDirectly(){
+        //call search service to get list of apartments
+        //use spark to call 8080/list
+
+
     }
 }

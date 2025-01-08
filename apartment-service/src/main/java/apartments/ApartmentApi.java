@@ -1,5 +1,7 @@
 package apartments;
 
+import common.Ports;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +12,7 @@ public class ApartmentApi {
     // Initialize the API
     public static void initialize() {
         ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(8080);
+        port(Ports.APARTMENT_PORT);
 
         // Welcome message
         get("/", (req, res) -> {
@@ -80,6 +82,13 @@ public class ApartmentApi {
 
             res.type("text/plain");
             return response.toString();  // Return apartment list as plain text
+        });
+
+        // Remove all
+        delete("/remove_all", (req, res) -> {
+            ApartmentDAO.removeAllApartments();
+            res.status(200);  // OK
+            return "All apartments removed successfully!";
         });
     }
 }

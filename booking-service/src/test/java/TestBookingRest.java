@@ -1,18 +1,14 @@
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static spark.Spark.*;
-import static io.restassured.RestAssured.*;
-
 import bookings.BookingApi;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import spark.Spark;
 
 import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static spark.Spark.stop;
 
 public class TestBookingRest {
 

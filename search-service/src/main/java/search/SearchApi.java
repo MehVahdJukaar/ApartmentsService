@@ -1,5 +1,7 @@
 package search;
 
+import common.Ports;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +12,7 @@ public class SearchApi {
     // Initialize the API
     public static void initialize() {
         ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(8082);
+        port(Ports.SEARCH_PORT);
 
         // Welcome message
         get("/", (req, res) -> {

@@ -1,6 +1,6 @@
 package bookings;
 
-import messages.*;
+import common.*;
 
 import java.sql.Date;
 import java.util.UUID;

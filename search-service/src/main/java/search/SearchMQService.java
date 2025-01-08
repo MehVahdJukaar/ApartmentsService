@@ -1,9 +1,6 @@
 package search;
 
-import messages.*;
-
-import java.sql.Date;
-import java.util.UUID;
+import common.*;
 
 public class SearchMQService extends SimpleRabbitMQService {
 

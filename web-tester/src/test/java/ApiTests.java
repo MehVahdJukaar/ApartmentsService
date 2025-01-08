@@ -1,243 +1,270 @@
-import org.apache.commons.lang3.tuple.Pair;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.*;
 
 public class ApiTests {
 
     private static final String BASE_URL_BOOKING = "http://localhost:8081";
     private static final String BASE_URL_APARTMENT = "http://localhost:8080";
 
-    private Pair<Integer, String> sendRequest(String urlString, String params, String method) throws IOException {
-        URL url;
-        if ("DELETE".equals(method)) {
-            // Append query parameters directly to the URL for DELETE requests
-            url = new URL(urlString + "?" + params);
-        } else {
-            url = new URL(urlString);
-        }
-
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod(method);
-
-        if ("POST".equals(method) || "DELETE".equals(method)) {
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            if ("POST".equals(method) || "DELETE".equals(method)) {
-                try (OutputStream os = connection.getOutputStream()) {
-                    byte[] input = params.getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                }
-            }
-        } else if ("GET".equals(method)) {
-            connection.setDoOutput(false);
-        }
-
-        int responseCode = connection.getResponseCode();
-        StringBuilder response = new StringBuilder();
-        try {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream(), "utf-8"))) {
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-            }
-        }catch (Exception e){
-
-        }
-
-        return Pair.of(responseCode, response.toString());
-    }
-
-    public Pair<Integer, String> sendPostRequest(String urlString, String params) throws IOException {
-        return sendRequest(urlString, params, "POST");
-    }
-
-    public Pair<Integer, String> sendGetRequest(String urlString) throws IOException {
-        return sendRequest(urlString, "", "GET");
-    }
-
-    public Pair<Integer, String> sendDeleteRequest(String urlString, String params) throws IOException {
-        return sendRequest(urlString, params, "DELETE");
+    @BeforeEach
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL_BOOKING;
+        //reset all bookings
+        given()
+                .when()
+                .delete("/cancel_all")
+                .then()
+                .statusCode(200);
+        RestAssured.baseURI = BASE_URL_APARTMENT;
+        //reset all apartments
+        given()
+                .when()
+                .delete("/remove_all")
+                .then()
+                .statusCode(200);
     }
 
     @Test
-    void testAddApartment_Valid() throws Exception {
-        Pair<Integer, String> response = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment1&address=123 Street&noiselevel=2&floor=3");
-        assertEquals(201, response.getKey());
+    @Order(1)
+    public void testAddApartment() {
+        RestAssured.baseURI = BASE_URL_APARTMENT;
+        given()
+                .queryParam("name", "Apartment 101")
+                .queryParam("address", "123 Main St")
+                .queryParam("noiselevel", 3)
+                .queryParam("floor", 2)
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(201);  // Assert HTTP status code
     }
 
     @Test
-    void testAddApartment_MissingField() throws Exception {
-        Pair<Integer, String> response = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2");
-        assertEquals(400, response.getKey());
+    @Order(2)
+    public void testListApartments() {
+        Response response =
+                when()
+                        .get("/list")
+                        .then()
+                        .statusCode(200)  // Assert HTTP status code
+                        .extract().response();
+
+        // Ensure response contains the added apartment
+        String body = response.getBody().asString();
+        Assertions.assertTrue(body.contains("Apartment 101"));
     }
 
     @Test
-    void testListApartments() throws Exception {
-        // Add two apartments first
-        sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2&floor=3");
-        sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Modern Apartment&address=456 Avenue&noiselevel=5&floor=5");
+    @Order(3)
+    public void testRemoveApartment() {
+        // Replace with the actual UUID from your database or mock the UUID
+        String apartmentId = addApartment();
 
-        // Now list apartments
-        URL url = new URL(BASE_URL_APARTMENT + "/list");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
+        given()
+                .queryParam("id", apartmentId)
+                .when()
+                .delete("/remove")
+                .then()
+                .statusCode(200);
+    }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"))) {
-            StringBuilder response = new StringBuilder();
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
+    private static String addApartment() {
+        String oldBaseUri = RestAssured.baseURI;
+        RestAssured.baseURI = BASE_URL_APARTMENT;
+        AtomicReference<String> apartmentId = new AtomicReference<>();
 
-            // Check that both apartments are listed
-            assertTrue(response.toString().contains("Cozy Apartment"));
-            assertTrue(response.toString().contains("Modern Apartment"));
-        }
+        given()
+                .queryParam("name", "Apartment 101")
+                .queryParam("address", "123 Main St")
+                .queryParam("noiselevel", 3)
+                .queryParam("floor", 2)
+                .when()
+                .post("/add")
+                .then()
+                .body(new BaseMatcher<String>() {
+
+                    @Override
+                    public void describeTo(Description description) {
+
+                    }
+
+                    @Override
+                    public boolean matches(Object o) {
+                        apartmentId.set(o.toString());
+                        return true;
+                    }
+                });  // Assert HTTP status code
+        RestAssured.baseURI = oldBaseUri;
+        return apartmentId.get();
     }
 
     @Test
-    void testRemoveApartment_Valid() throws Exception {
-        // Add an apartment and get its UUID
-        Pair<Integer, String> addResponse = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2&floor=3");
-        assertEquals(201, addResponse.getKey());
-        String apartmentId = addResponse.getRight(); // Assuming UUID is returned in response body
-
-        // Remove the apartment using the UUID
-        Pair<Integer, String> removeResponse = sendDeleteRequest(BASE_URL_APARTMENT + "/remove", "id=" + apartmentId);
-        assertEquals(200, removeResponse.getKey());
+    @Order(4)
+    public void testListEmpty() {
+        when()
+                .get("/list")
+                .then()
+                .statusCode(404)  // Assert HTTP status code
+                .body(equalTo("No apartments found!"));  // Assert response body
     }
 
     @Test
-    void testRemoveApartment_Invalid() throws Exception {
-        // Try to remove an apartment that doesn't exist
-        Pair<Integer, String> response = sendDeleteRequest(BASE_URL_APARTMENT + "/remove",
-                "id="+ UUID.randomUUID());
-        assertEquals(404, response.getKey());
+    @Order(5)
+    public void testAddBooking() {
+        RestAssured.baseURI = BASE_URL_BOOKING;
+
+        String apartmentId = addApartment();
+        String fromDate = "2024-12-01";
+        String toDate = "2024-12-10";
+        String who = "John Doe";
+
+        given()
+                .queryParam("apartment", apartmentId)
+                .queryParam("from", fromDate)
+                .queryParam("to", toDate)
+                .queryParam("who", who)
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(201)
+                .body(matchesPattern(".+"));  // Check if ID is returned
     }
 
     @Test
-    void testAddBooking_ValidApartment() throws Exception {
-        // Add an apartment and get its UUID
-        Pair<Integer, String> apartmentResponse = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2&floor=3");
-        assertEquals(201, apartmentResponse.getKey());
-        String apartmentId = apartmentResponse.getValue().trim(); // Assuming UUID is returned in response body
+    @Order(6)
+    public void testCancelBooking() {
+        RestAssured.baseURI = BASE_URL_BOOKING;
+        // Add a booking to cancel it
+        String apartmentId = addApartment();
+        String fromDate = "2024-12-01";
+        String toDate = "2024-12-10";
+        String who = "John Doe";
 
-        // Book the apartment using the UUID
-        Pair<Integer, String> bookingResponse = sendPostRequest(BASE_URL_BOOKING + "/add", "apartment=" + apartmentId + "&from=20250101&to=20250105&who=JohnDoe");
-        assertEquals(201, bookingResponse.getKey());
+        String bookingId = given()
+                .queryParam("apartment", apartmentId)
+                .queryParam("from", fromDate)
+                .queryParam("to", toDate)
+                .queryParam("who", who)
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(201)
+                .extract().body().asString();
+
+        // Now cancel the booking
+        given()
+                .queryParam("id", bookingId)
+                .when()
+                .delete("/cancel")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Booking canceled successfully!"));
     }
 
     @Test
-    void testAddBooking_InvalidApartment() throws Exception {
-        // Attempt to book a non-existent apartment (UUID 999)
-        Pair<Integer, String> response = sendPostRequest(BASE_URL_BOOKING + "/add", "apartment=999&from=20250101&to=20250105&who=JohnDoe");
-        assertEquals(404, response.getKey());
-        assertTrue(response.getValue().contains("Apartment not found"));
-    }
+    @Order(7)
+    public void testChangeBooking() {
+        RestAssured.baseURI = BASE_URL_BOOKING;
+        // Add a booking to change it
+        String apartmentId = addApartment();
+        String fromDate = "2024-12-01";
+        String toDate = "2024-12-10";
+        String who = "John Doe";
 
-    @Test
-    void testCancelBooking_Valid() throws Exception {
-        // Add an apartment and get its UUID
-        Pair<Integer, String> addResponse = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2&floor=3");
-        assertEquals(200, addResponse.getKey());
-        String apartmentId = addResponse.getValue().trim();
-
-        // Book the apartment
-        Pair<Integer, String> bookingResponse = sendPostRequest(BASE_URL_BOOKING + "/add", "apartment=" + apartmentId + "&from=20250101&to=20250105&who=JohnDoe");
-        assertEquals(200, bookingResponse.getKey());
-        assertTrue(bookingResponse.getValue().contains("Booking added successfully"));
-
-        // Now cancel the booking using its ID
-        Pair<Integer, String> cancelResponse = sendPostRequest(BASE_URL_BOOKING + "/cancel", "id=1");
-        assertEquals(200, cancelResponse.getKey());
-        assertTrue(cancelResponse.getValue().contains("Booking cancelled"));
-    }
-
-    @Test
-    void testCancelBooking_Invalid() throws Exception {
-        // Try canceling a non-existent booking (ID 999)
-        Pair<Integer, String> response = sendPostRequest(BASE_URL_BOOKING + "/cancel", "id=999");
-        assertEquals(404, response.getKey());
-        assertTrue(response.getValue().contains("Booking not found"));
-    }
-
-    @Test
-    void testChangeBooking_Valid() throws Exception {
-        // Add an apartment and get its UUID
-        Pair<Integer, String> addResponse = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2&floor=3");
-        assertEquals(200, addResponse.getKey());
-        String apartmentId = addResponse.getValue().trim();
-
-        // Book the apartment
-        Pair<Integer, String> bookingResponse = sendPostRequest(BASE_URL_BOOKING + "/add", "apartment=" + apartmentId + "&from=20250101&to=20250105&who=JohnDoe");
-        assertEquals(200, bookingResponse.getKey());
-        assertTrue(bookingResponse.getValue().contains("Booking added successfully"));
+        String bookingId = given()
+                .queryParam("apartment", apartmentId)
+                .queryParam("from", fromDate)
+                .queryParam("to", toDate)
+                .queryParam("who", who)
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(201)
+                .extract().body().asString();
 
         // Change the booking dates
-        Pair<Integer, String> changeResponse = sendPostRequest(BASE_URL_BOOKING + "/change", "id=1&from=20250110&to=20250115");
-        assertEquals(200, changeResponse.getKey());
-        assertTrue(changeResponse.getValue().contains("Booking changed"));
+        String newFromDate = "2024-12-05";
+        String newToDate = "2024-12-15";
+
+        given()
+                .queryParam("id", bookingId)
+                .queryParam("from", newFromDate)
+                .queryParam("to", newToDate)
+                .when()
+                .post("/change")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Booking changed successfully!"));
     }
 
     @Test
-    void testChangeBooking_Invalid() throws Exception {
-        // Try changing a non-existent booking (ID 999)
-        Pair<Integer, String> response = sendPostRequest(BASE_URL_BOOKING + "/change", "id=999&from=20250110&to=20250112");
-        assertEquals(404, response.getKey());
-        assertTrue(response.getValue().contains("Booking not found"));
+    @Order(8)
+    public void testListBookings() {
+        // Add a booking first to list it
+        String apartmentId = addApartment();
+        String fromDate = "2024-12-01";
+        String toDate = "2024-12-10";
+        String who = "John Doe";
+
+        given()
+                .queryParam("apartment", apartmentId)
+                .queryParam("from", fromDate)
+                .queryParam("to", toDate)
+                .queryParam("who", who)
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(201);
+
+        // Now list the bookings
+        given()
+                .when()
+                .get("/list")
+                .then()
+                .statusCode(200)
+                .body(containsString("Booking ID:"));
     }
 
     @Test
-    void testBookingInteractionWithApartments() throws Exception {
-        // Add apartments and get UUIDs
-        Pair<Integer, String> apartment1Response = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Cozy Apartment&address=123 Street&noiselevel=2&floor=3");
-        assertEquals(200, apartment1Response.getKey());
-        String apartment1Id = apartment1Response.getValue().trim();
+    @Order(9)
+    public void testAddInvalidBooking() {
+        RestAssured.baseURI = BASE_URL_BOOKING;
 
-        Pair<Integer, String> apartment2Response = sendPostRequest(BASE_URL_APARTMENT + "/add", "name=Modern Apartment&address=456 Avenue&noiselevel=5&floor=5");
-        assertEquals(200, apartment2Response.getKey());
-        String apartment2Id = apartment2Response.getValue().trim();
+        given()
+                .queryParam("apartment", "invalid-uuid")
+                .queryParam("from", "2024-12-01")
+                .queryParam("to", "2024-12-10")
+                .queryParam("who", "John Doe")
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(400)
+                .body(equalTo("Invalid parameters!"));
+    }
 
-        // Book a valid apartment
-        Pair<Integer, String> bookingResponse = sendPostRequest(BASE_URL_BOOKING + "/add", "apartment=" + apartment1Id + "&from=20250101&to=20250105&who=JohnDoe");
-        assertEquals(200, bookingResponse.getKey());
-        assertTrue(bookingResponse.getValue().contains("Booking added successfully"));
-
-        // Try booking a non-existent apartment
-        Pair<Integer, String> invalidBookingResponse = sendPostRequest(BASE_URL_BOOKING + "/add", "apartment=999&from=20250101&to=20250105&who=JaneDoe");
-        assertEquals(404, invalidBookingResponse.getKey());
-        assertTrue(invalidBookingResponse.getValue().contains("Apartment not found"));
-
-        // Try canceling a non-existent booking
-        Pair<Integer, String> cancelResponse = sendPostRequest(BASE_URL_BOOKING + "/cancel", "id=999");
-        assertEquals(404, cancelResponse.getKey());
-        assertTrue(cancelResponse.getValue().contains("Booking not found"));
-
-        // List bookings and ensure the valid booking appears
-        URL url = new URL(BASE_URL_BOOKING + "/list");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"))) {
-            StringBuilder responseContent = new StringBuilder();
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                responseContent.append(responseLine.trim());
-            }
-            assertTrue(responseContent.toString().contains("id"));
-        }
+    @Test
+    @Order(10)
+    public void testCancelNonExistentBooking() {
+        given()
+                .queryParam("id", UUID.randomUUID().toString())
+                .when()
+                .delete("/cancel")
+                .then()
+                .statusCode(404);
     }
 }

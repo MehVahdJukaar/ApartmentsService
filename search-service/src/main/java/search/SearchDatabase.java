@@ -35,7 +35,7 @@ public class SearchDatabase {
             // Create the apartments table
             String createApartmentsTableQuery = "CREATE TABLE IF NOT EXISTS apartments (" +
                     "id TEXT PRIMARY KEY," +
-                    "apartment_name TEXT NOT NULL" +  // Add more fields as needed
+                    "name TEXT NOT NULL" +  // Add more fields as needed
                     ");";
 
             stmt.execute(createBookingsTableQuery);

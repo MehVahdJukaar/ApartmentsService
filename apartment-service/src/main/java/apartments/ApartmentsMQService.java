@@ -1,8 +1,8 @@
 package apartments;
 
-import messages.ApartmentAddedMessage;
-import messages.Message;
-import messages.SimpleRabbitMQService;
+import common.ApartmentAddedMessage;
+import common.Message;
+import common.SimpleRabbitMQService;
 
 import java.util.UUID;
 
@@ -27,6 +27,6 @@ public class ApartmentsMQService extends SimpleRabbitMQService {
     }
 
     public static void publishApartmentRemoved(UUID apartmentId) {
-        INSTANCE.publishMessage(new messages.ApartmentRemovedMessage(apartmentId));
+        INSTANCE.publishMessage(new common.ApartmentRemovedMessage(apartmentId));
     }
 }
