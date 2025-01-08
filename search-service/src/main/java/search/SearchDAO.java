@@ -37,6 +37,36 @@ public class SearchDAO {
         }
     }
 
+    public static List<String> getAllApartments() {
+        String query = "SELECT name FROM apartments;";
+        List<String> apartments = new ArrayList<>();
+        try (Connection conn = SearchDatabase.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                apartments.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return apartments;
+    }
+
+    public static List<String> getAllBookings() {
+        String query = "SELECT id FROM bookings;";
+        List<String> bookings = new ArrayList<>();
+        try (Connection conn = SearchDatabase.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                bookings.add(rs.getString("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+
     // Add a booking for an apartment
     public static void addBooking(UUID bookingId, UUID apartmentId, Date startDate, Date endDate) {
         String insertBookingQuery = "INSERT INTO bookings (id, apartment_id, start_date, end_date) VALUES (?, ?, ?, ?);";
@@ -90,6 +120,19 @@ public class SearchDAO {
             e.printStackTrace();
         }
         return availableApartments;
+    }
+
+    public static void clearAllData() {
+        String deleteBookingsQuery = "DELETE FROM bookings;";
+        String deleteApartmentsQuery = "DELETE FROM apartments;";
+        try (Connection conn = SearchDatabase.getConnection();
+             PreparedStatement deleteBookingsStmt = conn.prepareStatement(deleteBookingsQuery);
+             PreparedStatement deleteApartmentsStmt = conn.prepareStatement(deleteApartmentsQuery)) {
+            deleteBookingsStmt.executeUpdate();
+            deleteApartmentsStmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

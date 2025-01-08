@@ -1,9 +1,7 @@
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -20,6 +18,7 @@ public class ApiTests {
 
     private static final String BASE_URL_BOOKING = "http://localhost:8081";
     private static final String BASE_URL_APARTMENT = "http://localhost:8080";
+    private static final String BASE_URL_SEARCH = "http://localhost:8082";
 
     @BeforeEach
     public void setUp() {
@@ -57,6 +56,9 @@ public class ApiTests {
     @Test
     @Order(2)
     public void testListApartments() {
+        RestAssured.baseURI = BASE_URL_APARTMENT;
+
+        addApartment();
         Response response =
                 when()
                         .get("/list")
@@ -215,6 +217,7 @@ public class ApiTests {
     @Test
     @Order(8)
     public void testListBookings() {
+        RestAssured.baseURI = BASE_URL_BOOKING;
         // Add a booking first to list it
         String apartmentId = addApartment();
         String fromDate = "2024-12-01";
@@ -267,4 +270,105 @@ public class ApiTests {
                 .then()
                 .statusCode(404);
     }
+
+    @Test
+    @Order(11)
+    public void testSearchMissingQueryParams() {
+        RestAssured.baseURI = BASE_URL_SEARCH;
+
+        // Missing both 'from' and 'to'
+        given()
+                .when()
+                .get("/search")
+                .then()
+                .statusCode(400)
+                .body(equalTo("Both 'from' and 'to' query parameters are required!"));
+
+        // Missing 'from'
+        given()
+                .queryParam("to", "2024-12-10")
+                .when()
+                .get("/search")
+                .then()
+                .statusCode(400)
+                .body(equalTo("Both 'from' and 'to' query parameters are required!"));
+
+        // Missing 'to'
+        given()
+                .queryParam("from", "2024-12-01")
+                .when()
+                .get("/search")
+                .then()
+                .statusCode(400)
+                .body(equalTo("Both 'from' and 'to' query parameters are required!"));
+    }
+
+    @Test
+    @Order(12)
+    public void testSearchNoAvailableApartments() {
+        RestAssured.baseURI = BASE_URL_SEARCH;
+
+        given()
+                .queryParam("from", "2025-01-01")
+                .queryParam("to", "2025-01-10")
+                .when()
+                .get("/search")
+                .then()
+                .statusCode(404)
+                .body(equalTo("No available apartments found for the given date range."));
+    }
+
+
+    @Test
+    @Order(13)
+    public void testSearchAvailableApartments() {
+        RestAssured.baseURI = BASE_URL_SEARCH;
+
+        // Add an apartment for testing
+        String apartmentId = addApartment();
+
+        // Add a booking to make sure the search returns this apartment
+        RestAssured.baseURI = BASE_URL_SEARCH + "/booking";
+        String fromDate = "2024-12-01";
+        String toDate = "2024-12-10";
+
+        given()
+                .queryParam("apartment", apartmentId)
+                .queryParam("from", fromDate)
+                .queryParam("to", toDate)
+                .queryParam("who", "Test User")
+                .when()
+                .post("/add")
+                .then()
+                .statusCode(201);
+
+        // Search for available apartments
+        RestAssured.baseURI = BASE_URL_SEARCH;
+        given()
+                .queryParam("from", fromDate)
+                .queryParam("to", toDate)
+                .when()
+                .get("/search")
+                .then()
+                .statusCode(200)
+                .body(containsString(apartmentId)); // Ensure the apartment ID is in the response
+    }
+
+    @Test
+    @Order(4)
+    public void testSearchInvalidDateRange() {
+        RestAssured.baseURI = BASE_URL_SEARCH;
+
+        // Invalid date range (from > to)
+        given()
+                .queryParam("from", "2024-12-10")
+                .queryParam("to", "2024-12-01")
+                .when()
+                .get("/search")
+                .then()
+                .statusCode(400)
+                .body(equalTo("Invalid date range: 'from' must be before 'to'."));
+    }
+
+
 }

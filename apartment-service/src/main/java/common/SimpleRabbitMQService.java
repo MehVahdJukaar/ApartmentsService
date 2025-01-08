@@ -123,7 +123,7 @@ public abstract class SimpleRabbitMQService {
             return;  // Ignore messages sent by this service
         }
         String jsonMessage = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        System.out.println(" [x] Received: " + jsonMessage);
+        System.out.println(" [o] Received: " + jsonMessage);
         try {
             // Deserialize the message using the Message interface
             Message message = Message.deserialize(jsonMessage);

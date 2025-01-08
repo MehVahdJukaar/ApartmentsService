@@ -13,6 +13,11 @@ public class Main {
         ApartmentsMQService.initialize();
 
         ApartmentDAO.removeAllApartments();
+
+        //add sample apartments
+        Apartment apartment1 = new Apartment("Apartment 1", "Address 1", 1, 1);
+        ApartmentDAO.addApartment(apartment1);
+
         // Publish a message to the MQ as an example
         ApartmentsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Apartments!"));
 

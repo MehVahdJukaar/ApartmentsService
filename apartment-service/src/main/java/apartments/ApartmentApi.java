@@ -1,8 +1,10 @@
 package apartments;
 
+import com.google.gson.Gson;
 import common.Ports;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static spark.Spark.*;
@@ -14,6 +16,7 @@ public class ApartmentApi {
         ipAddress("0.0.0.0");  // Listen on all available network interfaces
         port(Ports.APARTMENT_PORT);
 
+        Gson gson = new Gson();
         // Welcome message
         get("/", (req, res) -> {
             res.status(200);  // OK
@@ -64,24 +67,10 @@ public class ApartmentApi {
         // Endpoint to list all apartments
         get("/list", (req, res) -> {
             List<Apartment> apartments = ApartmentDAO.getAllApartments();
-            StringBuilder response = new StringBuilder();
 
-            if (apartments.isEmpty()) {
-                res.status(404);  // Not Found
-                return "No apartments found!";
-            }
-
-            for (Apartment apartment : apartments) {
-                response.append("ID: ").append(apartment.id())
-                        .append(", Name: ").append(apartment.name())
-                        .append(", Address: ").append(apartment.address())
-                        .append(", Noise Level: ").append(apartment.noiseLevel())
-                        .append(", Floor: ").append(apartment.floor())
-                        .append("\n");
-            }
-
-            res.type("text/plain");
-            return response.toString();  // Return apartment list as plain text
+            res.type("application/json");
+            res.status(200);  // OK
+            return gson.toJson(apartments);  // Serialize the list of apartments to JSON
         });
 
         // Remove all

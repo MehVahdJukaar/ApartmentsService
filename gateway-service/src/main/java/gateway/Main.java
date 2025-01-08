@@ -1,4 +1,4 @@
-package search;
+package gateway;
 
 
 public class Main {

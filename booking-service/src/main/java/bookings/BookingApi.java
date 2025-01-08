@@ -2,10 +2,12 @@ package bookings;
 
 import bookings.Booking;
 import bookings.BookingDAO;
+import com.google.gson.Gson;
 import common.Ports;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static spark.Spark.*;
@@ -16,6 +18,7 @@ public class BookingApi {
     public static void initialize() {
         ipAddress("0.0.0.0");
         port(Ports.BOOKING_PORT);
+        Gson gson = new Gson();
 
         // Welcome message
         get("/", (req, res) -> {
@@ -104,24 +107,10 @@ public class BookingApi {
         // Endpoint to list all bookings
         get("/list", (req, res) -> {
             List<Booking> bookings = BookingDAO.listAllBookings();
-            StringBuilder response = new StringBuilder();
 
-            if (bookings.isEmpty()) {
-               // res.status(404);  // Not Found
-               // return "No bookings found!";
-            }
-
-            for (Booking booking : bookings) {
-                response.append("Booking ID: ").append(booking.id())
-                        .append(", Apartment ID: ").append(booking.apartmentID())
-                        .append(", From: ").append(booking.fromDate())
-                        .append(", To: ").append(booking.toDate())
-                        .append(", Booked by: ").append(booking.who())
-                        .append("\n");
-            }
-
-            res.type("text/plain");
-            return response.toString();  // Return booking list as plain text
+            res.type("application/json");
+            res.status(200);  // OK
+            return gson.toJson(bookings);  // Serialize the list of bookings to JSON
         });
 
         // Cancel all

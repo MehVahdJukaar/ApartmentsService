@@ -1,4 +1,4 @@
-package search;
+package gateway;
 
 import common.Ports;
 import kong.unirest.HttpResponse;
