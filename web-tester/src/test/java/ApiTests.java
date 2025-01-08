@@ -121,8 +121,8 @@ public class ApiTests {
         when()
                 .get("/list")
                 .then()
-                .statusCode(404)  // Assert HTTP status code
-                .body(equalTo("No apartments found!"));  // Assert response body
+                .statusCode(200)  // Assert HTTP status code
+                .body(equalTo("[]"));  // Assert response body
     }
 
     @Test
@@ -221,8 +221,8 @@ public class ApiTests {
         // Add a booking first to list it
         String apartmentId = addApartment();
         String fromDate = "2024-12-01";
-        String toDate = "2024-12-10";
-        String who = "John Doe";
+        String toDate = "2024-12-12";
+        String who = "John Doee";
 
         given()
                 .queryParam("apartment", apartmentId)
@@ -240,7 +240,7 @@ public class ApiTests {
                 .get("/list")
                 .then()
                 .statusCode(200)
-                .body(containsString("Booking ID:"));
+                .body(containsString(who));
     }
 
     @Test
@@ -327,8 +327,8 @@ public class ApiTests {
         // Add an apartment for testing
         String apartmentId = addApartment();
 
-        // Add a booking to make sure the search returns this apartment
-        RestAssured.baseURI = BASE_URL_SEARCH + "/booking";
+        //add booking
+        RestAssured.baseURI = BASE_URL_BOOKING;
         String fromDate = "2024-12-01";
         String toDate = "2024-12-10";
 
@@ -351,7 +351,7 @@ public class ApiTests {
                 .get("/search")
                 .then()
                 .statusCode(200)
-                .body(containsString(apartmentId)); // Ensure the apartment ID is in the response
+                .body(not(containsString(apartmentId))); // Ensure the apartment ID is in the response
     }
 
     @Test

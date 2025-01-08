@@ -1,9 +1,9 @@
 package search;
 
 import common.Ports;
+import kong.unirest.HttpStatus;
 
 import java.util.List;
-import java.util.UUID;
 
 import static spark.Spark.*;
 
@@ -31,14 +31,14 @@ public class SearchApi {
                 return "Both 'from' and 'to' query parameters are required!";
             }
 
+            //validate dates
+            if (fromDate.compareTo(toDate) > 0) {
+                res.status(400); // Bad Request
+                return "The 'from' date must be before the 'to' date!";
+            }
+
             // Call the method to get available apartments
             List<String> availableApartments = SearchDAO.getAvailableApartments(fromDate, toDate);
-
-            // If no apartments found
-            if (availableApartments.isEmpty()) {
-                res.status(404);  // Not Found
-                return "No available apartments found for the given date range.";
-            }
 
             // Return the available apartments as a comma-separated list
             res.status(200);  // OK

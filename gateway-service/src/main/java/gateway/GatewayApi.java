@@ -23,6 +23,22 @@ public class GatewayApi {
             res.status(200);  // OK
             return "Welcome to the Gateway Microservice!";
         });
+
+        // Forward any /apartments/* call to the apartments service
+        path("/apartments", () -> {
+            before("/*", (req, res) -> forwardRequest(Ports.APARTMENT_PORT, req, res));
+        });
+
+        // Forward any /bookings/* call to the bookings service
+        path("/bookings", () -> {
+            before("/*", (req, res) -> forwardRequest(Ports.BOOKING_PORT, req, res));
+        });
+
+        // Forward any /search/* call to the search service
+        path("/search", () -> {
+            before("/*", (req, res) -> forwardRequest(Ports.SEARCH_PORT, req, res));
+        });
+
         // Search endpoint
         get("/search", (req, res) -> {
             //forward to search service
@@ -91,6 +107,7 @@ public class GatewayApi {
             return response.getBody();
         } catch (Exception e) {
             res.status(500);
+            e.printStackTrace();
             return "Error forwarding request: " + e.getMessage();
         }
     }

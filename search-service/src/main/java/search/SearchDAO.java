@@ -103,8 +103,8 @@ public class SearchDAO {
                         SELECT 1
                         FROM bookings b
                         WHERE b.apartment_id = a.id
-                          AND b.start_date < ?  -- Booking ends after check-in
-                          AND b.end_date > ?    -- Booking starts before check-out
+                          AND b.from_date < ?  -- Booking ends after check-in
+                          AND b.to_date > ?    -- Booking starts before check-out
                     );
                 """;
         List<String> availableApartments = new ArrayList<>();
