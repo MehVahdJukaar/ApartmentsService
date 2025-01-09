@@ -14,8 +14,17 @@ public class ForwardTest {
         // Initialize Server 2 on port 4568 using a separate Service instance
         spark.Service server2 = ignite();
         server2.port(4568);
-        server2.get("/some/call", (req, res) -> {
-            return "Response from Server 2";
+        server2.get("/get", (req, res) -> {
+            return "Response from Server 2 Get";
+        });
+        server2.post("/post", (req, res) -> {
+            return "Response from Server 2 Post";
+        });
+        server2.put("/put", (req, res) -> {
+            return "Response from Server 2 Put";
+        });
+        server2.delete("/delete", (req, res) -> {
+            return "Response from Server 2 Delete";
         });
         server2.get("/", (req, res) -> {
             return "Hello from Server 2";
@@ -40,10 +49,6 @@ public class ForwardTest {
     private static void forwardRoute(spark.Service s, String path, String targetHost) {
         // Handle all HTTP methods for the given path
         s.get(path, (req, res) -> forward(req, res, targetHost));
-        s.post(path, (req, res) -> forward(req, res, targetHost));
-        s.put(path, (req, res) -> forward(req, res, targetHost));
-        s.delete(path, (req, res) -> forward(req, res, targetHost));
-        s.patch(path, (req, res) -> forward(req, res, targetHost));
     }
 
     private static String forward(Request req, Response res, String targetHost) {
