@@ -79,7 +79,7 @@ public class BookingApi {
         });
 
         // Endpoint to change a booking
-        post("/change", (req, res) -> {
+        put("/change", (req, res) -> {
             UUID bookingId;
             Date fromDate;
             Date toDate;

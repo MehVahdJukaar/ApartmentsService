@@ -11,13 +11,28 @@ import java.net.InetSocketAddress;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static spark.Spark.*;
+
 public class ForwardTest2 {
     public static void main(String[] args) throws Exception {
-        // Start the first server on port 4567 with 4 HTTP methods (GET, POST, DELETE, PUT)
-        HttpServer server1 = HttpServer.create(new InetSocketAddress(4567), 0);
-        server1.createContext("/", new Server1Handler());
-        server1.start();
-        System.out.println("Server 1 running on port 4567");
+
+        port(4567);
+        // Start the first server on port 4567
+        get("/", (req, res) -> {
+            return "Welcome to server 1";
+        });
+        get("/get", (req, res) -> {
+            return "Response from Server 1 Get";
+        });
+        post("/post", (req, res) -> {
+            return "Response from Server 1 Post";
+        });
+        put("/put", (req, res) -> {
+            return "Response from Server 1 Put";
+        });
+        delete("/delete", (req, res) -> {
+            return "Response from Server 1 Delete";
+        });
 
         // Start the second server on port 4568 that forwards requests to Server 1
         HttpServer server2 = HttpServer.create(new InetSocketAddress(4568), 0);
@@ -26,26 +41,16 @@ public class ForwardTest2 {
         System.out.println("Server 2 running on port 4568");
     }
 
-    static class Server1Handler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String response = "Handled " + exchange.getRequestMethod() + " request.";
-            exchange.sendResponseHeaders(200, response.getBytes().length);
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.getBytes());
-            }
-        }
-    }
-
-    static class Server2Handler implements HttpHandler {
+     static class Server2Handler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             URI requestUri = exchange.getRequestURI();
             String path = requestUri.getPath();
 
-            if (path.startsWith("/forward/")) {
+            String key = "forward";
+            if (path.startsWith("/"+key)) {
                 // Forward the request to Server 1 (directly)
-                String forwardPath = path.substring(9);  // Remove '/forward/'
+                String forwardPath = path.substring(key.length()+1);  // Remove '/forward/'
                 URI forwardUri = URI.create("http://localhost:4567" + forwardPath);
 
                 // Forward the request and response from Server 1

@@ -23,10 +23,8 @@ repositories {
 dependencies {
     annotationProcessor "org.checkerframework:checker:3.31.0"
     implementation "org.checkerframework:checker-qual:3.31.0"
-    implementation "org.xerial:sqlite-jdbc:${project.sqliteVersion}" // SQLite dependency with version from gradle.properties
     implementation "com.sparkjava:spark-core:${project.sparkVersion}" // Spark framework with version from gradle.properties
     implementation "com.google.code.gson:gson:${project.gsonVersion}" // Gson with version from gradle.properties
-    implementation "com.rabbitmq:amqp-client:${project.rabbitmqVersion}" // RabbitMQ client with version from gradle.properties
     implementation "com.konghq:unirest-java:${project.unirestVersion}" // Unirest with version from gradle.properties
 
 }
