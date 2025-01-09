@@ -1,5 +1,9 @@
 package search;
 
+import kong.unirest.json.JSONArray;
+import kong.unirest.json.JSONElement;
+import kong.unirest.json.JSONObject;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,4 +139,45 @@ public class SearchDAO {
         }
     }
 
+
+    public static JSONElement dumpApartments() {
+        return dump("apartments");
+    }
+
+    public static JSONElement dumpBookings() {
+        return dump("bookings");
+    }
+
+    private static JSONArray dump(String tableName) {
+        String sql = "SELECT * FROM " + tableName; // Fetch all rows from the table
+        JSONArray jsonArray = new JSONArray(); // Array to hold all rows
+
+        try (Connection conn = SearchDatabase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while (rs.next()) {
+                JSONObject jsonObject = new JSONObject(); // Object for each row
+
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnLabel(i); // Get column name
+                    Object value = rs.getObject(i); // Get column value
+                    jsonObject.put(columnName, value);
+                }
+
+                jsonArray.put(jsonObject); // Add row to array
+            }
+
+            return jsonArray; // Return JSON array as string
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return jsonArray; // Return empty JSON array if an error occurs
+    }
 }

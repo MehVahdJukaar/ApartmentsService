@@ -16,7 +16,8 @@ public class Main {
 
         //add sample apartments
         Apartment apartment1 = new Apartment("Apartment 1", "Address 1", 1, 1);
-        ApartmentDAO.addApartment(apartment1);
+        var id = ApartmentDAO.addApartment(apartment1);
+        System.out.println("Apartment added with id: " + id);
 
         // Publish a message to the MQ as an example
         ApartmentsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Apartments!"));

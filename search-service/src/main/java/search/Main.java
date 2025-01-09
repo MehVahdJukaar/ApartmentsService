@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import common.Ports;
-import common.StringMessage;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
@@ -27,6 +26,8 @@ public class Main {
             Thread.sleep(1000);  // Sleep for a short time so other services can start
             if (SearchDAO.getAllApartments().isEmpty()) {
                 fetchApartmentsDirectly();
+            }else {
+                System.out.println("Apartments already fetched" + SearchDAO.getAllApartments());
             }
             if (SearchDAO.getAllBookings().isEmpty()) {
                 fetchBookingsDirectly();
@@ -50,7 +51,8 @@ public class Main {
     }
 
     public static void fetchApartmentsDirectly() {
-        HttpResponse<String> response = Unirest.get(Ports.APARTMENT_HOST + "/list")
+        System.out.println("Fetching apartments from the Apartment service...");
+        HttpResponse<String> response = Unirest.get("http://" + Ports.APARTMENT_HOST + "/list")
                 .asString();
 
         if (response.isSuccess()) {
@@ -58,6 +60,7 @@ public class Main {
 
             // Parse the JSON response
             JsonArray apartments = JsonParser.parseString(body).getAsJsonArray();
+            System.out.println("Apartments fetched: " + apartments);
 
             // Iterate through each apartment and print its id and name
             for (JsonElement element : apartments) {
@@ -72,7 +75,8 @@ public class Main {
     }
 
     public static void fetchBookingsDirectly() {
-        HttpResponse<String> response = Unirest.get(Ports.BOOKING_HOST + "/list")
+        System.out.println("Fetching bookings from the Booking service...");
+        HttpResponse<String> response = Unirest.get("http://" + Ports.BOOKING_HOST + "/list")
                 .asString();
 
         if (response.isSuccess()) {

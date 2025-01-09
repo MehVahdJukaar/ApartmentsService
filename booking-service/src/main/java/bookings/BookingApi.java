@@ -119,5 +119,20 @@ public class BookingApi {
             res.status(200);  // OK
             return "All bookings canceled successfully!";
         });
+
+
+        // Debug
+
+        get("/dump_apartments", (req, res) -> {
+            res.status(200);
+            res.type("application/json");
+            return BookingDAO.dumpApartments();
+        });
+
+        get("/dump_bookings", (req, res) -> {
+            res.status(200);
+            res.type("application/json");
+            return BookingDAO.dumpBookings();
+        });
     }
 }

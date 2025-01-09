@@ -48,7 +48,8 @@ public class Main {
     }
 
     public static void fetchApartmentsDirectly() {
-        HttpResponse<String> response = Unirest.get(Ports.APARTMENT_HOST + "/list")
+        System.out.println("Fetching apartments from the Apartment service...");
+        HttpResponse<String> response = Unirest.get("http://" + Ports.APARTMENT_HOST + "/list")
                 .asString();
 
         if (response.isSuccess()) {

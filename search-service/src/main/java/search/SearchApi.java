@@ -44,5 +44,19 @@ public class SearchApi {
             res.status(200);  // OK
             return String.join(", ", availableApartments);
         });
+
+        // Debug
+
+        get("/dump_apartments", (req, res) -> {
+            res.status(200);
+            res.type("application/json");
+            return SearchDAO.dumpApartments();
+        });
+
+        get("/dump_bookings", (req, res) -> {
+            res.status(200);
+            res.type("application/json");
+            return SearchDAO.dumpBookings();
+        });
     }
 }
