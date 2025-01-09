@@ -6,35 +6,44 @@ import kong.unirest.Unirest;
 import spark.Request;
 import spark.Response;
 
-import java.io.IOException;
+import static spark.Service.ignite;
 
-import static spark.Spark.*;
+public class ForwardTest {
 
-public class GatewayApi {
+    public static void main(String[] args) {
+        // Initialize Server 2 on port 4568 using a separate Service instance
+        spark.Service server2 = ignite();
+        server2.port(4568);
+        server2.get("/some/call", (req, res) -> {
+            return "Response from Server 2";
+        });
+        server2.get("/", (req, res) -> {
+            return "Hello from Server 2";
+        });
+        System.out.println("Server 2 is running on port 4568.");
 
-    public static void initialize() throws IOException {
-        ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(Ports.GATEWAY_PORT);
+
+        spark.Service server1 = ignite();
+
+        server1.port(4567);
 
         // Default route
-        get("/", (req, res) -> {
+        server1.get("/", (req, res) -> {
             res.status(200);  // OK
-            return "Welcome to the Gateway Microservice!";
+            return "Welcome to server 1";
         });
 
         // Forwarding routes for all HTTP methods
-        forwardRoute("/apartments/*", Ports.APARTMENT_HOST);
-        forwardRoute("/bookings/*", Ports.BOOKING_HOST);
-        forwardRoute("/search/*", Ports.SEARCH_HOST);
+       forwardRoute(server1, "/test/*", "localhost:4568");
     }
 
-    private static void forwardRoute(String path, String targetHost) {
+    private static void forwardRoute(spark.Service s, String path, String targetHost) {
         // Handle all HTTP methods for the given path
-        get(path, (req, res) -> forward(req, res, targetHost));
-        post(path, (req, res) -> forward(req, res, targetHost));
-        put(path, (req, res) -> forward(req, res, targetHost));
-        delete(path, (req, res) -> forward(req, res, targetHost));
-        patch(path, (req, res) -> forward(req, res, targetHost));
+        s.get(path, (req, res) -> forward(req, res, targetHost));
+        s.post(path, (req, res) -> forward(req, res, targetHost));
+        s.put(path, (req, res) -> forward(req, res, targetHost));
+        s.delete(path, (req, res) -> forward(req, res, targetHost));
+        s.patch(path, (req, res) -> forward(req, res, targetHost));
     }
 
     private static String forward(Request req, Response res, String targetHost) {
@@ -62,6 +71,5 @@ public class GatewayApi {
         res.status(forwarded.getStatus());
         return new String(forwarded.getBody());
     }
-
 
 }
