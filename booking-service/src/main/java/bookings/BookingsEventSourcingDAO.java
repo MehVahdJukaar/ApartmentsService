@@ -40,9 +40,9 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
                         Date fromDate = rs.getDate("from_date");
                         Date toDate = rs.getDate("to_date");
                         Booking existingBooking = bookings.get(UUID.fromString(rs.getString("booking_id")));
-                        if ( existingBooking == null) {
+                        if (existingBooking == null) {
                             throw new AssertionError("Booking not found for change event");
-                        }else{
+                        } else {
                             Booking booking = new Booking(existingBooking.id(), existingBooking.apartmentID(), fromDate, toDate, existingBooking.who());
                             bookings.put(booking.id(), booking);
                         }
@@ -54,7 +54,8 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
                         } else {
                             throw new AssertionError("Booking not found for cancel event");
                         }
-                    }case ALL_BOOKINGS_CANCELLED -> {
+                    }
+                    case ALL_BOOKINGS_CANCELLED -> {
                         bookings.clear();
                     }
                 }
@@ -157,6 +158,45 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public boolean rollbackToBooking(UUID bookingId) {
+        //delete all entries AFTER the booking with this ID was ADDED
+        // SQL to find the id of the booking created event
+        String findBookingEventId = "SELECT id FROM event_log WHERE booking_id = ? AND event_type = ? LIMIT 1";
+
+        // SQL to delete events after the found event id
+        String deleteEvents = "DELETE FROM event_log WHERE id > ?";
+
+        try (Connection conn = database.getConnection();
+             PreparedStatement findStmt = conn.prepareStatement(findBookingEventId)) {
+
+            // Set the booking ID and event type for the original booking event
+            findStmt.setString(1, bookingId.toString());
+            findStmt.setString(2, EventType.BOOKING_ADDED.toString());
+
+            // Execute query to get the event id of the booking creation event
+            try (ResultSet rs = findStmt.executeQuery()) {
+                if (rs.next()) {
+                    int bookingEventId = rs.getInt("id");
+
+                    // Now delete events with ids greater than the booking event id
+                    try (PreparedStatement deleteStmt = conn.prepareStatement(deleteEvents)) {
+                        deleteStmt.setInt(1, bookingEventId);
+                        int rowsAffected = deleteStmt.executeUpdate();
+                        return rowsAffected > 0; // Return true if any events were deleted
+                    }
+                } else {
+                    // If no matching booking event is found, return false
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     @Override
     public List<Booking> listAllBookings() {

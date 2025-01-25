@@ -32,6 +32,7 @@ public abstract sealed class BookingsDAO permits BookingsStateDAO, BookingsEvent
 
     public abstract void cancelAllBookings();
 
+    public abstract boolean rollbackToBooking(UUID bookingId);
 
     // Getters
 
@@ -143,4 +144,5 @@ public abstract sealed class BookingsDAO permits BookingsStateDAO, BookingsEvent
 
         return jsonArray; // Return empty JSON array if an error occurs
     }
+
 }

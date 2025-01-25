@@ -154,6 +154,12 @@ public final class BookingsStateDAO extends BookingsDAO {
         }
     }
 
+    @Override
+    public boolean rollbackToBooking(UUID bookingId) {
+        // Not supported in the State
+        System.out.println("Rollback is not supported in the State.");
+        return false;
+    }
 
     @Override
     public JSONElement dumpBookings() {

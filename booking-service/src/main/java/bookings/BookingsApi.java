@@ -118,6 +118,26 @@ public class BookingsApi {
             return "All bookings canceled successfully!";
         });
 
+        // Rollback to booking ID
+        delete("/rollback", (req, res) -> {
+            UUID bookingId;
+            try {
+                bookingId = UUID.fromString(req.queryParams("to"));
+            } catch (IllegalArgumentException e) {
+                res.status(400);  // Bad Request
+                return "Invalid booking ID!";
+            }
+
+            boolean success = BookingsDAO.INSTANCE.rollbackToBooking(bookingId);
+            if (success) {
+                res.status(200);  // OK
+                return "Booking rolled back successfully!";
+            } else {
+                res.status(404);  // Not Found
+                return "Booking not found!";
+            }
+        });
+
 
         // Debug
 

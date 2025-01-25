@@ -16,18 +16,30 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Initializing Bookings...");
 
+        // Default value for event sourcing
         boolean isEventSourcing = true;
+
+        // Check if an argument for event sourcing is passed
+        if (args.length > 0) {
+            String eventSourcingArg = args[0].toLowerCase();
+            if ("false".equals(eventSourcingArg)) {
+                isEventSourcing = false;
+            } else if (!"true".equals(eventSourcingArg)) {
+                System.out.println("Invalid argument for event sourcing. Using default: true");
+            }
+        }
 
         // Initialize the database (create the table if it doesn't exist)
         BookingsDAO.initialize(isEventSourcing);
+
+        // Initialize the rest API
         BookingsApi.initialize();
 
-
+        // Initialize the message queue service
         BookingsMQService.initialize();
 
-        // Publish a message to the MQ as an example
+        // Publish a hello world to the MQ
         BookingsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));
-
 
 
         try {
