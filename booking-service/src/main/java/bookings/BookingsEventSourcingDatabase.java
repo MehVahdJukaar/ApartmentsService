@@ -29,13 +29,13 @@ public class BookingsEventSourcingDatabase {
             String createEventLogTable = "CREATE TABLE IF NOT EXISTS event_log (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "event_type TEXT NOT NULL," +
-                    "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP" +
+                    "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP," +
 
                     "booking_id TEXT," +
                     "apartment_id TEXT," +
                     "from_date DATE," +
                     "to_date DATE," +
-                    "who TEXT," +
+                    "who TEXT" +
                     ");";
 
             // Create the apartments table

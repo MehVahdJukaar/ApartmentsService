@@ -19,7 +19,8 @@ public abstract sealed class BookingsDAO permits BookingsStateDAO, BookingsEvent
         INSTANCE = usesEventSourcing ? new BookingsEventSourcingDAO() : new BookingsStateDAO();
     }
 
-    protected abstract Connection getConnection() throws SQLException;
+    //visible for testing
+    public abstract Connection getConnection() throws SQLException;
 
     // Modify State
 

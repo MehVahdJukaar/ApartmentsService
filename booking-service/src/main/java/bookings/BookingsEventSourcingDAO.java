@@ -15,7 +15,7 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
     public final BookingsEventSourcingDatabase database = new BookingsEventSourcingDatabase();
 
     @Override
-    protected Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         return database.getConnection();
     }
 
@@ -26,7 +26,7 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
         // SQL query to retrieve all events for all bookings ordered by timestamp
         String query = "SELECT event_type, booking_id, timestamp, apartment_id, from_date, to_date, who FROM event_log";
 
-        try (Connection conn = database.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 EventType eventType = EventType.fromString(rs.getString("event_type"));
                 // Rebuild the state for each booking
@@ -37,11 +37,15 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
                         bookings.put(booking.id(), booking);
                     }
                     case BOOKING_CHANGED -> {
-                        Booking booking = parseBooking(rs);
-                        if (bookings.get(booking.id()) != null) {
+                        Date fromDate = rs.getDate("from_date");
+                        Date toDate = rs.getDate("to_date");
+                        Booking existingBooking = bookings.get(UUID.fromString(rs.getString("booking_id")));
+                        if ( existingBooking == null) {
                             throw new AssertionError("Booking not found for change event");
+                        }else{
+                            Booking booking = new Booking(existingBooking.id(), existingBooking.apartmentID(), fromDate, toDate, existingBooking.who());
+                            bookings.put(booking.id(), booking);
                         }
-                        bookings.put(booking.id(), booking);
                     }
                     case BOOKING_CANCELLED -> {
                         UUID bookingId = UUID.fromString(rs.getString("booking_id"));

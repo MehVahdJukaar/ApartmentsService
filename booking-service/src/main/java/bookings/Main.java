@@ -8,6 +8,7 @@ import common.StringMessage;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
+import java.sql.Date;
 import java.util.UUID;
 
 public class Main {
@@ -20,10 +21,13 @@ public class Main {
         // Initialize the database (create the table if it doesn't exist)
         BookingsDAO.initialize(isEventSourcing);
         BookingsApi.initialize();
+
+
         BookingsMQService.initialize();
 
         // Publish a message to the MQ as an example
         BookingsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));
+
 
 
         try {

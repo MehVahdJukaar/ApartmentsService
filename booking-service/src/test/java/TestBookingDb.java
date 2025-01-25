@@ -17,8 +17,8 @@ public class TestBookingDb {
     @BeforeEach
     public void setUp() throws Exception {
         // Initialize the database before each test
-        BookingsDAO.initialize(false);
-        conn = ((BookingsStateDAO) BookingsDAO.INSTANCE).database.getConnection();
+        BookingsDAO.initialize(true);
+        conn = BookingsDAO.INSTANCE.getConnection();
     }
 
     @AfterEach

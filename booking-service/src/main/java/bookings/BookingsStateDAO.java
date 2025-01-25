@@ -14,7 +14,7 @@ public final class BookingsStateDAO extends BookingsDAO {
     public final BookingsStateDatabase database = new BookingsStateDatabase();
 
     @Override
-    protected Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         return database.getConnection();
     }
 
