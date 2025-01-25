@@ -1,4 +1,4 @@
-import bookings.BookingApi;
+import bookings.BookingsApi;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +15,7 @@ public class TestBookingRest {
     @BeforeAll
     public static void setUp() {
         // Start Spark server
-        BookingApi.initialize();
+        BookingsApi.initialize();
         RestAssured.baseURI = "http://localhost:4567";
     }
 

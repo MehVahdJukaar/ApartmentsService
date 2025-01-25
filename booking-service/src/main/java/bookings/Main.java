@@ -15,18 +15,20 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Initializing Bookings...");
 
+        boolean isEventSourcing = true;
+
         // Initialize the database (create the table if it doesn't exist)
-        BookingDatabase.initialize();
-        BookingApi.initialize();
-        BookingMQService.initialize();
+        BookingsDAO.initialize(isEventSourcing);
+        BookingsApi.initialize();
+        BookingsMQService.initialize();
 
         // Publish a message to the MQ as an example
-        BookingMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));
+        BookingsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));
 
 
         try {
             Thread.sleep(10000);  // Sleep for a short time so other services can start
-            if (BookingDAO.listApartments().isEmpty()) {
+            if (BookingsDAO.INSTANCE.listApartments().isEmpty()) {
                 fetchApartmentsDirectly();
             }
         } catch (InterruptedException e) {
@@ -62,7 +64,7 @@ public class Main {
             for (JsonElement element : apartments) {
                 UUID id = UUID.fromString(element.getAsJsonObject().get("id").getAsString());
                 String name = element.getAsJsonObject().get("name").getAsString();
-                BookingDAO.addApartment(id, name);
+                BookingsDAO.INSTANCE.addApartment(id, name);
                 System.out.println("Fetched apartment: " + name);
             }
         } else {

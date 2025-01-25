@@ -5,24 +5,24 @@ import common.*;
 import java.sql.Date;
 import java.util.UUID;
 
-public class BookingMQService extends SimpleRabbitMQService {
+public class BookingsMQService extends SimpleRabbitMQService {
 
-    public static final BookingMQService INSTANCE = new BookingMQService();
+    public static final BookingsMQService INSTANCE = new BookingsMQService();
 
     public static void initialize() {
     }
 
-    BookingMQService() {
+    BookingsMQService() {
         super("booking");
     }
 
     @Override
     public void onMessageReceived(Message message) {
         if (message instanceof ApartmentAddedMessage added) {
-            BookingDAO.addApartment(added.id(), added.name());
+            BookingsDAO.INSTANCE.addApartment(added.id(), added.name());
             System.out.println("Apartment added: " + added.name() + " at " + added.address());
         } else if (message instanceof ApartmentRemovedMessage removed) {
-            BookingDAO.removeApartment(removed.apartmentId());
+            BookingsDAO.INSTANCE.removeApartment(removed.apartmentId());
             System.out.println("Apartment removed: " + removed.apartmentId());
         }
     }

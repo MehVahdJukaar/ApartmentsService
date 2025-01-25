@@ -5,14 +5,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class BookingDatabase {
+public class BookingsStateDatabase {
+
     private static final String DB_PATH = System.getenv("BOOKING_DB_PATH") != null ?
             System.getenv("BOOKING_DB_PATH") : "bookings.db";
 
-    private static Connection connection;
+    private Connection connection;
 
     // Connect to SQLite database
-    public static Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) { // Ensure the connection is open
             connection = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
         }
@@ -20,7 +21,7 @@ public class BookingDatabase {
     }
 
     // Initialize the database (create tables if they don't exist)
-    public static void initialize() {
+    public BookingsStateDatabase() {
         try (Connection conn = getConnection(); // This line ensures the connection is open
              Statement stmt = conn.createStatement()) {
 
