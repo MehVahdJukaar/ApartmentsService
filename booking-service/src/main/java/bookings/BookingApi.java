@@ -1,21 +1,22 @@
 package bookings;
 
-import bookings.Booking;
-import bookings.BookingDAO;
 import com.google.gson.Gson;
 import common.Ports;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static spark.Spark.*;
 
 public class BookingApi {
 
+    private static BookingDataAccess DATA;
+
     // Initialize the API
     public static void initialize() {
+        BookingDataAccess data = new BookingDAO();
+
         ipAddress("0.0.0.0");
         port(Ports.BOOKING_PORT);
         Gson gson = new Gson();
@@ -45,7 +46,7 @@ public class BookingApi {
 
             // Create new booking object
             Booking booking = new Booking(apartmentId, fromDate, toDate, who);
-            boolean success = BookingDAO.addBooking(booking);
+            boolean success = data.addBooking(booking);
 
             if (success) {
                 BookingMQService.publishBookingAdded(booking);
@@ -67,7 +68,7 @@ public class BookingApi {
                 return "Invalid booking ID!";
             }
 
-            boolean success = BookingDAO.cancelBooking(bookingId);
+            boolean success = data.cancelBooking(bookingId);
             if (success) {
                 BookingMQService.publishBookingCancelled(bookingId);
                 res.status(200);  // OK
@@ -93,7 +94,7 @@ public class BookingApi {
                 return "Invalid parameters!";
             }
 
-            boolean success = BookingDAO.changeBookingDates(bookingId, fromDate, toDate);
+            boolean success = data.changeBookingDates(bookingId, fromDate, toDate);
             if (success) {
                 BookingMQService.publishBookingChanged(bookingId, fromDate, toDate);
                 res.status(200);  // OK
@@ -106,7 +107,7 @@ public class BookingApi {
 
         // Endpoint to list all bookings
         get("/list", (req, res) -> {
-            List<Booking> bookings = BookingDAO.listAllBookings();
+            List<Booking> bookings = data.listAllBookings();
 
             res.type("application/json");
             res.status(200);  // OK
@@ -115,7 +116,7 @@ public class BookingApi {
 
         // Cancel all
         delete("/cancel_all", (req, res) -> {
-            BookingDAO.cancelAllBookings();
+            data.cancelAllBookings();
             res.status(200);  // OK
             return "All bookings canceled successfully!";
         });
@@ -126,13 +127,13 @@ public class BookingApi {
         get("/dump_apartments", (req, res) -> {
             res.status(200);
             res.type("application/json");
-            return BookingDAO.dumpApartments();
+            return data.dumpApartments();
         });
 
         get("/dump_bookings", (req, res) -> {
             res.status(200);
             res.type("application/json");
-            return BookingDAO.dumpBookings();
+            return data.dumpBookings();
         });
     }
 }

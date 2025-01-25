@@ -1,7 +1,5 @@
 package bookings;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONElement;
 import kong.unirest.json.JSONObject;
@@ -12,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class BookingDAO {
+public class BookingDAO implements BookingDataAccess {
 
     // Method to add a booking
-    public static boolean addBooking(Booking booking) {
+    public boolean addBooking(Booking booking) {
         // Check if the apartment exists before adding the booking
         if (!getApartment(booking.apartmentID())) {
             System.out.println("Apartment with ID " + booking.apartmentID() + " does not exist.");
@@ -44,7 +42,7 @@ public class BookingDAO {
 
     // Method to retrieve a booking by its ID
     @Nullable
-    public static Booking getBookingById(UUID bookingId) {
+    public Booking getBookingById(UUID bookingId) {
         String sql = "SELECT * FROM bookings WHERE id = ?";
         Booking booking = null;
 
@@ -64,7 +62,7 @@ public class BookingDAO {
     }
 
     // Method to cancel a booking by ID
-    public static boolean cancelBooking(UUID bookingId) {
+    public boolean cancelBooking(UUID bookingId) {
         String sql = "DELETE FROM bookings WHERE id = ?";
 
         try (Connection conn = BookingDatabase.getConnection();
@@ -82,7 +80,7 @@ public class BookingDAO {
     }
 
     // Method to change an existing booking by ID
-    public static boolean changeBooking(UUID bookingId, Date newFromDate, Date newToDate) {
+    public boolean changeBooking(UUID bookingId, Date newFromDate, Date newToDate) {
         String sql = "UPDATE bookings SET from_date = ?, to_date = ? WHERE id = ?";
 
         try (Connection conn = BookingDatabase.getConnection();
@@ -102,7 +100,7 @@ public class BookingDAO {
     }
 
     // Method to list all bookings
-    public static List<Booking> listAllBookings() {
+    public List<Booking> listAllBookings() {
         List<Booking> bookings = new ArrayList<>();
         String sql = "SELECT * FROM bookings";
 
@@ -124,7 +122,7 @@ public class BookingDAO {
 
     // Helper method to parse a result set into a Booking object
     @Nullable
-    private static Booking parseBooking(ResultSet rs) throws SQLException {
+    private Booking parseBooking(ResultSet rs) throws SQLException {
         try {
             UUID id = UUID.fromString(rs.getString("id"));
             UUID apartmentId = UUID.fromString(rs.getString("apartment_id"));
@@ -140,7 +138,7 @@ public class BookingDAO {
     }
 
     // Method to change the booking dates if the apartment is available
-    public static boolean changeBookingDates(UUID bookingId, Date fromDate, Date toDate) {
+    public boolean changeBookingDates(UUID bookingId, Date fromDate, Date toDate) {
         // First, check if the apartment is available for the new dates
         String sql = "UPDATE bookings SET from_date = ?, to_date = ? WHERE id = ?";
 
@@ -158,7 +156,7 @@ public class BookingDAO {
         return false;  // Return false if the apartment is not available
     }
 
-    public static void cancelAllBookings() {
+    public void cancelAllBookings() {
         String sql = "DELETE FROM bookings";
 
         try (Connection conn = BookingDatabase.getConnection();
@@ -169,7 +167,7 @@ public class BookingDAO {
         }
     }
 
-    public static void addApartment(UUID apartmentId, String name) {
+    public void addApartment(UUID apartmentId, String name) {
         String insertApartmentQuery = "INSERT OR IGNORE INTO apartments (id, name) VALUES (?, ?);";
         try (Connection conn = BookingDatabase.getConnection();
              PreparedStatement stmt = conn.prepareStatement(insertApartmentQuery)) {
@@ -181,7 +179,7 @@ public class BookingDAO {
         }
     }
 
-    public static boolean removeApartment(UUID apartmentId) {
+    public boolean removeApartment(UUID apartmentId) {
         String deleteApartmentQuery = "DELETE FROM apartments WHERE id = ?;";
         try (Connection conn = BookingDatabase.getConnection();
              PreparedStatement stmt = conn.prepareStatement(deleteApartmentQuery)) {
@@ -195,7 +193,7 @@ public class BookingDAO {
     }
 
     // Get a list of all apartments from the apartments table
-    public static List<UUID> listApartments() {
+    public List<UUID> listApartments() {
         String selectApartmentsQuery = "SELECT id FROM apartments;";
         List<UUID> apartments = new ArrayList<>();
         try (Connection conn = BookingDatabase.getConnection();
@@ -211,7 +209,7 @@ public class BookingDAO {
         return apartments;
     }
 
-    public static boolean getApartment(UUID apartmentId) {
+    public boolean getApartment(UUID apartmentId) {
         String sql = "SELECT COUNT(*) FROM apartments WHERE id = ?"; // Assuming 'apartments' table exists
 
         try (Connection conn = BookingDatabase.getConnection();
@@ -230,15 +228,15 @@ public class BookingDAO {
         return false; // Returns false if no apartment is found
     }
 
-    public static JSONElement dumpApartments() {
+    public JSONElement dumpApartments() {
         return dump("apartments");
     }
 
-    public static JSONElement dumpBookings() {
+    public JSONElement dumpBookings() {
         return dump("bookings");
     }
 
-    private static JSONArray dump(String tableName) {
+    private JSONArray dump(String tableName) {
         String sql = "SELECT * FROM " + tableName; // Fetch all rows from the table
         JSONArray jsonArray = new JSONArray(); // Array to hold all rows
 

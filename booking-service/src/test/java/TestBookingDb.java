@@ -1,5 +1,6 @@
 import bookings.Booking;
 import bookings.BookingDAO;
+import bookings.BookingDataAccess;
 import bookings.BookingDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestBookingDb {
 
     private Connection conn;
+    private BookingDataAccess data;
 
     @BeforeEach
     public void setUp() throws Exception {
         // Initialize the database before each test
         BookingDatabase.initialize();
         conn = BookingDatabase.getConnection();
+        data = new BookingDAO();
     }
 
     @AfterEach
@@ -46,7 +49,7 @@ public class TestBookingDb {
 
         // Add a booking to the database
         Booking booking = new Booking(apartmentId, fromDate, toDate, who);
-        boolean success = BookingDAO.addBooking(booking);
+        boolean success = data.addBooking(booking);
 
         // Check if the booking was successfully added
         assertTrue(success, "Booking should be added successfully.");
@@ -62,10 +65,10 @@ public class TestBookingDb {
 
         // Add a booking to the database
         Booking booking = new Booking(apartmentId, fromDate, toDate, who);
-        BookingDAO.addBooking(booking);
+        data.addBooking(booking);
 
         // Retrieve the booking by ID
-        Booking retrievedBooking = BookingDAO.getBookingById(booking.id());
+        Booking retrievedBooking = data.getBookingById(booking.id());
 
         // Assert that the retrieved booking matches the original one
         assertNotNull(retrievedBooking, "Booking should be retrieved by ID.");
@@ -85,18 +88,18 @@ public class TestBookingDb {
 
         // Add a booking to the database
         Booking booking = new Booking(apartmentId, fromDate, toDate, who);
-        BookingDAO.addBooking(booking);
+        data.addBooking(booking);
 
         // Change booking dates
         Date newFromDate = new Date(fromDate.getTime() + 1000 * 60 * 60 * 48);  // 2 days later
         Date newToDate = new Date(newFromDate.getTime() + 1000 * 60 * 60 * 24);  // 1 day after newFromDate
-        boolean success = BookingDAO.changeBookingDates(booking.id(), newFromDate, newToDate);
+        boolean success = data.changeBookingDates(booking.id(), newFromDate, newToDate);
 
         // Verify that the dates were updated successfully
         assertTrue(success, "Booking dates should be changed successfully.");
 
         // Retrieve the updated booking and check the dates
-        Booking updatedBooking = BookingDAO.getBookingById(booking.id());
+        Booking updatedBooking = data.getBookingById(booking.id());
         assertNotNull(updatedBooking, "Updated booking should exist.");
         assertEquals(newFromDate, updatedBooking.fromDate(), "Updated from date should match.");
         assertEquals(newToDate, updatedBooking.toDate(), "Updated to date should match.");
@@ -112,16 +115,16 @@ public class TestBookingDb {
 
         // Add a booking to the database
         Booking booking = new Booking(apartmentId, fromDate, toDate, who);
-        BookingDAO.addBooking(booking);
+        data.addBooking(booking);
 
         // Remove the booking by ID
-        boolean success = BookingDAO.cancelBooking(booking.id());
+        boolean success = data.cancelBooking(booking.id());
 
         // Verify that the booking was removed successfully
         assertTrue(success, "Booking should be removed successfully.");
 
         // Try to retrieve the removed booking
-        Booking removedBooking = BookingDAO.getBookingById(booking.id());
+        Booking removedBooking = data.getBookingById(booking.id());
         assertNull(removedBooking, "Removed booking should not be found.");
     }
 
@@ -135,13 +138,13 @@ public class TestBookingDb {
 
         // Add a booking to the database
         Booking booking = new Booking(apartmentId, fromDate, toDate, who);
-        BookingDAO.addBooking(booking);
+        data.addBooking(booking);
 
         // Remove all bookings
-        BookingDAO.cancelAllBookings();
+        data.cancelAllBookings();
 
         // Verify that the bookings list is empty
-        List<Booking> bookings = BookingDAO.listAllBookings();
+        List<Booking> bookings = data.listAllBookings();
         assertTrue(bookings.isEmpty(), "Bookings list should be empty after deletion.");
     }
 }
