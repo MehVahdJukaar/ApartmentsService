@@ -63,7 +63,7 @@ services:
       - app-network
 
   consul:
-    image: consul:1.13.0  # Consul image version
+    image: consul:1.13.0
     container_name: consul
     ports:
       - "8500:8500"  # Consul UI port
