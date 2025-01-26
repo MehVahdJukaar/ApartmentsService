@@ -3,15 +3,17 @@ package bookings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import common.Ports;
+import common.ConsulService;
 import common.StringMessage;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
-import java.sql.Date;
 import java.util.UUID;
 
 public class Main {
+
+    public static final int PORT = System.getenv("BOOKING_PORT") != null ?
+            Integer.parseInt(System.getenv("BOOKING_PORT")) : 8081;
 
     public static void main(String[] args) {
         System.out.println("Initializing Bookings...");
@@ -29,11 +31,13 @@ public class Main {
             }
         }
 
+        ConsulService.registerService("bookings", "bookings-1", PORT);
+
         // Initialize the database (create the table if it doesn't exist)
         BookingsDAO.initialize(isEventSourcing);
 
         // Initialize the rest API
-        BookingsApi.initialize();
+        BookingsApi.initialize(PORT);
 
         // Initialize the message queue service
         BookingsMQService.initialize();
@@ -67,7 +71,8 @@ public class Main {
 
     public static void fetchApartmentsDirectly() {
         System.out.println("Fetching apartments from the Apartment service...");
-        HttpResponse<String> response = Unirest.get("http://" + Ports.APARTMENT_HOST + "/list")
+        HttpResponse<String> response = Unirest.get("http://" +
+                        ConsulService.discoverServiceAddress("apartments") + "/list")
                 .asString();
 
         if (response.isSuccess()) {

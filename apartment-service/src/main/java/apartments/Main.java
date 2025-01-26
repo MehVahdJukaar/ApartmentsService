@@ -1,30 +1,23 @@
 package apartments;
 
+import common.ConsulService;
 import common.StringMessage;
 
 public class Main {
 
+    public static final int PORT = System.getenv("APARTMENT_PORT") != null ?
+            Integer.parseInt(System.getenv("APARTMENT_PORT")) : 8080;
+
     public static void main(String[] args) {
         System.out.println("Initializing Apartments...");
 
-        // Initialize the database (create the table if it doesn't exist)
+        ConsulService.registerService("apartments", "apartments-1", PORT);
         ApartmentsDatabase.initialize();
-        ApartmentApi.initialize();
+        ApartmentsApi.initialize(PORT);
         ApartmentsMQService.initialize();
 
-        ApartmentDAO.removeAllApartments();
-
-        //add sample apartments
-        Apartment apartment1 = new Apartment("Apartment 1", "Address 1", 1, 1);
-        var id = ApartmentDAO.addApartment(apartment1);
-        System.out.println("Apartment added with id: " + id);
-
-        // Publish a message to the MQ as an example
+        // Publish a hello message to the message queue
         ApartmentsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Apartments!"));
-
-        // Keep the application running until manually shut down
-        // Here, we can wait for a specific signal or use a simple mechanism
-        // to keep the app alive (like waiting for the server to be stopped).
 
         System.out.println("Application is running. Press Ctrl+C to stop.");
 

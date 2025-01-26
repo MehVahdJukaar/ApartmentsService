@@ -1,4 +1,5 @@
-import apartments.ApartmentApi;
+import apartments.ApartmentsApi;
+import apartments.Main;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
@@ -13,7 +14,7 @@ public class TestApartmentsRest {
     @BeforeAll
     public static void setUp() {
         // Start the API server
-        ApartmentApi.initialize();
+        ApartmentsApi.initialize(Main.PORT);
         RestAssured.baseURI = "http://localhost:4567";
     }
 

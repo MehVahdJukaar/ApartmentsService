@@ -1,8 +1,5 @@
 package search;
 
-import common.Ports;
-import kong.unirest.HttpStatus;
-
 import java.util.List;
 
 import static spark.Spark.*;
@@ -10,9 +7,9 @@ import static spark.Spark.*;
 public class SearchApi {
 
     // Initialize the API
-    public static void initialize() {
+    public static void initialize(int port) {
         ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(Ports.SEARCH_PORT);
+        port(port);
 
         // Welcome message
         get("/", (req, res) -> {

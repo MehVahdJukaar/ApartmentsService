@@ -1,5 +1,5 @@
 import apartments.Apartment;
-import apartments.ApartmentDAO;
+import apartments.ApartmentsDAO;
 import apartments.ApartmentsDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,10 +48,10 @@ public class TestApartmentsDb {
     public void testInsertData() throws Exception {
         // Insert a test record into the apartments table
         Apartment apartment = new Apartment("Apartment 101", "123 Main St", 2, 5);
-        ApartmentDAO.addApartment(apartment);
+        ApartmentsDAO.addApartment(apartment);
 
         // Verify if the data was inserted correctly
-        List<Apartment> apartments = ApartmentDAO.getAllApartments();
+        List<Apartment> apartments = ApartmentsDAO.getAllApartments();
         assertFalse(apartments.isEmpty(), "There should be at least one apartment in the list.");
         assertTrue(apartments.stream().anyMatch(a -> a.id().equals(apartment.id())), "Apartment with ID '1' should be present.");
     }
@@ -59,7 +59,7 @@ public class TestApartmentsDb {
     @Test
     public void testGetAllApartments() throws Exception {
         // Ensure we can retrieve all apartments
-        List<Apartment> apartments = ApartmentDAO.getAllApartments();
+        List<Apartment> apartments = ApartmentsDAO.getAllApartments();
         assertNotNull(apartments, "Apartments list should not be null.");
         assertTrue(!apartments.isEmpty(), "There should be at least one apartment in the list.");
     }
@@ -67,10 +67,10 @@ public class TestApartmentsDb {
     @Test
     public void testDeleteAllApartments() throws Exception {
         // Delete all apartments from the database
-        ApartmentDAO.removeAllApartments();
+        ApartmentsDAO.removeAllApartments();
 
         // Verify that the apartments list is empty
-        List<Apartment> apartments = ApartmentDAO.getAllApartments();
+        List<Apartment> apartments = ApartmentsDAO.getAllApartments();
         assertTrue(apartments.isEmpty(), "Apartments list should be empty after deletion.");
     }
 }

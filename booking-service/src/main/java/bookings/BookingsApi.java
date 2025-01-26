@@ -1,7 +1,6 @@
 package bookings;
 
 import com.google.gson.Gson;
-import common.Ports;
 
 import java.sql.Date;
 import java.util.List;
@@ -12,10 +11,10 @@ import static spark.Spark.*;
 public class BookingsApi {
 
     // Initialize the API
-    public static void initialize() {
+    public static void initialize(int port) {
 
         ipAddress("0.0.0.0");
-        port(Ports.BOOKING_PORT);
+        port(port);
         Gson gson = new Gson();
 
         // Welcome message

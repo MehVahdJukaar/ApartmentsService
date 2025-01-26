@@ -1,20 +1,20 @@
 package apartments;
 
 import com.google.gson.Gson;
-import common.Ports;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static spark.Spark.*;
 
-public class ApartmentApi {
+public class ApartmentsApi {
+
+
 
     // Initialize the API
-    public static void initialize() {
+    public static void initialize(int port) {
         ipAddress("0.0.0.0");  // Listen on all available network interfaces
-        port(Ports.APARTMENT_PORT);
+        port(port);
 
         Gson gson = new Gson();
         // Welcome message
@@ -31,7 +31,7 @@ public class ApartmentApi {
             int floor = Integer.parseInt(req.queryParams("floor"));
 
             Apartment apartment = new Apartment(name, address, noiseLevel, floor);
-            boolean success = ApartmentDAO.addApartment(apartment);
+            boolean success = ApartmentsDAO.addApartment(apartment);
 
             if (success) {
                 ApartmentsMQService.publishApartmentAdded(apartment);
@@ -53,7 +53,7 @@ public class ApartmentApi {
                 return "Invalid apartment ID!";
             }
 
-            boolean success = ApartmentDAO.removeApartmentById(apartmentId);
+            boolean success = ApartmentsDAO.removeApartmentById(apartmentId);
             if (success) {
                 ApartmentsMQService.publishApartmentRemoved(apartmentId);
                 res.status(200);  // OK
@@ -66,7 +66,7 @@ public class ApartmentApi {
 
         // Endpoint to list all apartments
         get("/list", (req, res) -> {
-            List<Apartment> apartments = ApartmentDAO.getAllApartments();
+            List<Apartment> apartments = ApartmentsDAO.getAllApartments();
 
             res.type("application/json");
             res.status(200);  // OK
@@ -75,7 +75,7 @@ public class ApartmentApi {
 
         // Remove all
         delete("/remove_all", (req, res) -> {
-            ApartmentDAO.removeAllApartments();
+            ApartmentsDAO.removeAllApartments();
             res.status(200);  // OK
             return "All apartments removed successfully!";
         });

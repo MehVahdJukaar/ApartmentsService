@@ -1,7 +1,5 @@
 package apartments;
 
-import apartments.Apartment;
-import apartments.ApartmentsDatabase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.*;
@@ -9,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ApartmentDAO {
+public class ApartmentsDAO {
 
     // Method to add an apartment to the database
     public static boolean addApartment(Apartment apartment) {

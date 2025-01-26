@@ -3,7 +3,7 @@ package gateway;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import common.Ports;
+import common.ConsulService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,22 +15,36 @@ import java.util.Map;
 
 public class GatewayApi {
 
-    public static void initialize() throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", Ports.GATEWAY_PORT), 0);
-        server.createContext("/", new ForwardHandler());
-        server.start();
-        System.out.println("Gateway running on port " + Ports.GATEWAY_PORT);
+    public static void initialize(int port) {
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+            server.createContext("/", new ForwardHandler());
+            server.start();
+            System.out.println("Gateway running on port " + port);
+        } catch (IOException e) {
+            System.out.println("Error starting Gateway: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     static class ForwardHandler implements HttpHandler {
-        private final Map<String, String> forwardMappings = Map.of(
-                "apartments", Ports.APARTMENT_HOST,
-                "bookings", Ports.BOOKING_HOST,
-                "search", Ports.SEARCH_HOST
-        );
+
+        //not the best. should be made to refresh sometimes
+        private Map<String, String> forwardMappings = null;
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+
+            //bad
+            if (forwardMappings == null) {
+                forwardMappings = Map.of(
+                        "apartments", ConsulService.discoverServiceAddress("apartments"),
+                        "bookings", ConsulService.discoverServiceAddress("bookings"),
+                        "search", ConsulService.discoverServiceAddress("search")
+                );
+            }
+
+
             URI requestUri = exchange.getRequestURI();
             String path = requestUri.getPath();
 

@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import common.Ports;
+import common.ConsulService;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
@@ -12,12 +12,18 @@ import java.sql.Date;
 import java.util.UUID;
 
 public class Main {
+
+    public static final int PORT = System.getenv("SEARCH_PORT") != null ?
+            Integer.parseInt(System.getenv("SEARCH_PORT")) : 8082;
+
     public static void main(String[] args) {
         System.out.println("Initializing Search...");
 
+        ConsulService.registerService("search", "search-1", PORT);
         // Initialize the database (create the table if it doesn't exist)
         SearchDatabase.initialize();
-        SearchApi.initialize();
+        SearchApi.initialize(PORT);
+        SearchMQService.initialize();
 
         SearchDAO.clearAllData();
 
@@ -26,7 +32,7 @@ public class Main {
             Thread.sleep(1000);  // Sleep for a short time so other services can start
             if (SearchDAO.getAllApartments().isEmpty()) {
                 fetchApartmentsDirectly();
-            }else {
+            } else {
                 System.out.println("Apartments already fetched" + SearchDAO.getAllApartments());
             }
             if (SearchDAO.getAllBookings().isEmpty()) {
@@ -52,7 +58,8 @@ public class Main {
 
     public static void fetchApartmentsDirectly() {
         System.out.println("Fetching apartments from the Apartment service...");
-        HttpResponse<String> response = Unirest.get("http://" + Ports.APARTMENT_HOST + "/list")
+        HttpResponse<String> response = Unirest.get("http://" +
+                        ConsulService.discoverServiceAddress("apartments") + "/list")
                 .asString();
 
         if (response.isSuccess()) {
@@ -76,7 +83,8 @@ public class Main {
 
     public static void fetchBookingsDirectly() {
         System.out.println("Fetching bookings from the Booking service...");
-        HttpResponse<String> response = Unirest.get("http://" + Ports.BOOKING_HOST + "/list")
+        HttpResponse<String> response = Unirest.get("http://" +
+                        ConsulService.discoverServiceAddress("bookings") + "/list")
                 .asString();
 
         if (response.isSuccess()) {

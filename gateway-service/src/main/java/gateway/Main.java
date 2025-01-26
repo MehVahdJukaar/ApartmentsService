@@ -1,18 +1,18 @@
 package gateway;
 
 
-import java.io.IOException;
+import common.ConsulService;
 
 public class Main {
+
+    public static final int PORT = System.getenv("GATEWAY_PORT") != null ?
+            Integer.parseInt(System.getenv("GATEWAY_PORT")) : 8083;
+
     public static void main(String[] args) {
         System.out.println("Initializing Gateway...");
 
-        try {
-            GatewayApi.initialize();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        ConsulService.registerService("gateway", "gateway-1", PORT);
+        GatewayApi.initialize(PORT);
 
         System.out.println("Application is running. Press Ctrl+C to stop.");
 
