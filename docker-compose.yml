@@ -7,6 +7,7 @@ services:
     ports:
       - "8080:8080"  # Map container's 8080 port to host's 8080 port
     depends_on:
+      - consul
       - rabbitmq
     networks:
       - app-network
@@ -17,6 +18,7 @@ services:
     ports:
       - "8081:8081"  # Map container's 8081 port to host's 8081 port
     depends_on:
+      - consul
       - rabbitmq
       - apartment-service
     networks:
@@ -28,6 +30,7 @@ services:
     ports:
       - "8082:8082"  # Map container's 8082 port to host's 8082 port
     depends_on:
+      - consul
       - rabbitmq
       - apartment-service
       - booking-service
@@ -40,6 +43,7 @@ services:
     ports:
       - "8083:8083"  # Map container's 8083 port to host's 8083 port
     depends_on:
+      - consul
       - rabbitmq
       - apartment-service
       - booking-service
@@ -55,6 +59,17 @@ services:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
       RABBITMQ_MANAGEMENT_PORT: 15673  # Set management plugin port to 15673
+    networks:
+      - app-network
+
+  consul:
+    image: consul:1.13.0  # Consul image version
+    container_name: consul
+    ports:
+      - "8500:8500"  # Consul UI port
+    environment:
+      CONSUL_BIND_INTERFACE: eth0  # Ensures Consul binds to the correct network interface
+    command: "agent -dev -client=0.0.0.0"  # Start Consul agent in development mode
     networks:
       - app-network
 
