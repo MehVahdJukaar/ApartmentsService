@@ -29,21 +29,16 @@ public class GatewayApi {
 
     static class ForwardHandler implements HttpHandler {
 
-        //not the best. should be made to refresh sometimes
-        private Map<String, String> forwardMappings = null;
-
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            System.out.println("Handling request");
 
-            //bad
-            if (forwardMappings == null) {
-                forwardMappings = Map.of(
-                        "apartments", ConsulService.discoverServiceAddress("apartments"),
-                        "bookings", ConsulService.discoverServiceAddress("bookings"),
-                        "search", ConsulService.discoverServiceAddress("search")
-                );
-            }
-
+            // checks with Consul to get the address of the services
+            Map<String, String> forwardMappings = Map.of(
+                    "apartments", ConsulService.discoverServiceAddress("apartments"),
+                    "bookings", ConsulService.discoverServiceAddress("bookings"),
+                    "search", ConsulService.discoverServiceAddress("search")
+            );
 
             URI requestUri = exchange.getRequestURI();
             String path = requestUri.getPath();
@@ -61,8 +56,14 @@ public class GatewayApi {
                     try {
                         forwardRequest(forwardUri, exchange);
                     } catch (IOException ioException) {
-                        System.out.println("Error forwarding request: " + ioException.getMessage());
+                        System.err.println("Error forwarding request to " + forwardUri + ": " + ioException.getMessage());
                         ioException.printStackTrace();
+
+                        // Respond with an internal server error (HTTP 502 Bad Gateway)
+                        exchange.sendResponseHeaders(502, 0);
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(("Error forwarding request: " + ioException.getMessage()).getBytes());
+                        }
                     }
                     return;
                 }

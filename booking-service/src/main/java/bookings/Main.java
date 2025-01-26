@@ -8,6 +8,7 @@ import common.StringMessage;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
+import java.sql.Date;
 import java.util.UUID;
 
 public class Main {
@@ -31,7 +32,8 @@ public class Main {
             }
         }
 
-        ConsulService.registerService("bookings", "bookings-1", PORT);
+        ConsulService.registerService("bookings", "bookings-1",
+                "booking-service", PORT);
 
         // Initialize the database (create the table if it doesn't exist)
         BookingsDAO.initialize(isEventSourcing);

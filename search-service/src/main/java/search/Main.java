@@ -19,7 +19,8 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Initializing Search...");
 
-        ConsulService.registerService("search", "search-1", PORT);
+        ConsulService.registerService("search", "search-1",
+                "search-service", PORT);
         // Initialize the database (create the table if it doesn't exist)
         SearchDatabase.initialize();
         SearchApi.initialize(PORT);

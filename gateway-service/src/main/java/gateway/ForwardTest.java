@@ -1,6 +1,5 @@
 package gateway;
 
-import common.Ports;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import spark.Request;

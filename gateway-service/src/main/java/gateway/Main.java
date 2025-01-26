@@ -11,7 +11,8 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Initializing Gateway...");
 
-        ConsulService.registerService("gateway", "gateway-1", PORT);
+        ConsulService.registerService("gateway", "gateway-1",
+                "gateway-service", PORT);
         GatewayApi.initialize(PORT);
 
         System.out.println("Application is running. Press Ctrl+C to stop.");

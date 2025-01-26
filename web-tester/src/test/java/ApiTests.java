@@ -367,7 +367,7 @@ public class ApiTests {
                 .get("/search")
                 .then()
                 .statusCode(400)
-                .body(equalTo("Invalid date range: 'from' must be before 'to'."));
+                .body(equalTo("The 'from' date must be before the 'to' date!"));
     }
 
 
