@@ -70,7 +70,7 @@ public class GatewayApi {
             }
 
             // If no matching prefix found, respond with an error
-            String response = "Invalid request";
+            String response = "Unknown Service " + path + ". Available services: " + forwardMappings.keySet();
             exchange.sendResponseHeaders(400, response.getBytes().length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());

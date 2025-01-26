@@ -12,7 +12,7 @@ public class Main {
         System.out.println("Initializing Apartments...");
 
         ConsulService.registerService("apartments", "apartments-1",
-                "apartnemt-service", PORT);
+                "apartment-service", PORT);
         ApartmentsDatabase.initialize();
         ApartmentsApi.initialize(PORT);
         ApartmentsMQService.initialize();
