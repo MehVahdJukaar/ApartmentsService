@@ -97,6 +97,7 @@ public class BookingsApi {
                 return "Booking changed successfully!";
             } else {
                 res.status(404);  // Not Found
+                System.out.println("Booking not found!");
                 return "Booking not found!";
             }
         });

@@ -130,8 +130,10 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
 
     @Override
     public boolean changeBookingDates(UUID bookingId, Date fromDate, Date toDate) {
+        System.out.println("Changing booking dates");
         // fist verify that the booking exists
         if (getBookingById(bookingId) == null) {
+            System.out.println("Booking not found for change event");
             return false;
         }
 
@@ -146,7 +148,7 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error changing booking dates" + e);
             return false;
         }
     }

@@ -188,6 +188,8 @@ public class ApiTests {
         String toDate = "2024-12-10";
         String who = "John Doe";
 
+        RestAssured.baseURI = BASE_URL_BOOKING;
+
         String bookingId = given()
                 .queryParam("apartment", apartmentId)
                 .queryParam("from", fromDate)
@@ -203,12 +205,14 @@ public class ApiTests {
         String newFromDate = "2024-12-05";
         String newToDate = "2024-12-15";
 
+        RestAssured.baseURI = BASE_URL_BOOKING;
+
         given()
                 .queryParam("id", bookingId)
                 .queryParam("from", newFromDate)
                 .queryParam("to", newToDate)
                 .when()
-                .post("/change")
+                .put("/change")
                 .then()
                 .statusCode(200)
                 .body(equalTo("Booking changed successfully!"));
