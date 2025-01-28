@@ -2,11 +2,16 @@ FROM gradle:7.5-jdk17 AS builder
 
 WORKDIR /app
 
-# Copy the Gradle build files and source code
+# Copy only Gradle-related files first to leverage Docker caching
 COPY gradle /app/gradle
 COPY gradlew /app/gradlew
 COPY build.gradle /app/build.gradle
 COPY gradle.properties /app/gradle.properties
+
+# Download dependencies without building the whole project
+RUN ./gradlew dependencies --no-daemon || true
+
+# Now copy the actual source code
 COPY src/main /app/src/main
 
 # Build the jar using Gradle
