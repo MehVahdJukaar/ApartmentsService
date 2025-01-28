@@ -130,6 +130,11 @@ public final class BookingsEventSourcingDAO extends BookingsDAO {
 
     @Override
     public boolean changeBookingDates(UUID bookingId, Date fromDate, Date toDate) {
+        // fist verify that the booking exists
+        if (getBookingById(bookingId) == null) {
+            return false;
+        }
+
         String insertEvent = "INSERT INTO event_log (event_type, booking_id, from_date, to_date) VALUES (?, ?, ?, ?)";
         try (Connection conn = database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(insertEvent)) {

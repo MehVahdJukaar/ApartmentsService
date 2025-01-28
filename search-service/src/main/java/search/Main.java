@@ -58,54 +58,82 @@ public class Main {
     }
 
     public static void fetchApartmentsDirectly() {
-        System.out.println("Fetching apartments from the Apartment service...");
-        HttpResponse<String> response = Unirest.get("http://" +
-                        ConsulService.discoverServiceAddress("apartments") + "/list")
-                .asString();
+        String apartmentsAddress = ConsulService.discoverServiceAddress("apartments");
+        System.out.println("Fetching apartments from the Apartment service from " + apartmentsAddress);
+        int tries = 0;
+        while (tries < 10) {
+            try {
+                HttpResponse<String> response = Unirest.get("http://" + apartmentsAddress + "/list").asString();
 
-        if (response.isSuccess()) {
-            String body = response.getBody();
+                if (response.isSuccess()) {
+                    String body = response.getBody();
 
-            // Parse the JSON response
-            JsonArray apartments = JsonParser.parseString(body).getAsJsonArray();
-            System.out.println("Apartments fetched: " + apartments);
+                    // Parse the JSON response
+                    JsonArray apartments = JsonParser.parseString(body).getAsJsonArray();
+                    System.out.println("Apartments fetched: " + apartments);
 
-            // Iterate through each apartment and print its id and name
-            for (JsonElement element : apartments) {
-                UUID id = UUID.fromString(element.getAsJsonObject().get("id").getAsString());
-                String name = element.getAsJsonObject().get("name").getAsString();
-                SearchDAO.addApartment(id, name);
-                System.out.println("Fetched apartment: " + name);
+                    // Iterate through each apartment and print its id and name
+                    for (JsonElement element : apartments) {
+                        UUID id = UUID.fromString(element.getAsJsonObject().get("id").getAsString());
+                        String name = element.getAsJsonObject().get("name").getAsString();
+                        SearchDAO.addApartment(id, name);
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error occurred while fetching apartments" + e);
             }
-        } else {
-            System.out.println("Failed to fetch apartments from the Apartment service.");
+
+            tries++;
+            System.out.println("Failed to fetch apartments from the Apartments service. Attempt " + tries + " Retrying...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     public static void fetchBookingsDirectly() {
-        System.out.println("Fetching bookings from the Booking service...");
-        HttpResponse<String> response = Unirest.get("http://" +
-                        ConsulService.discoverServiceAddress("bookings") + "/list")
-                .asString();
+        String bookingsAddress = ConsulService.discoverServiceAddress("bookings");
 
-        if (response.isSuccess()) {
-            String body = response.getBody();
+        System.out.println("Fetching bookings from the Booking service from " + bookingsAddress);
 
-            // Parse the JSON response
-            JsonArray bookings = JsonParser.parseString(body).getAsJsonArray();
+        int tries = 0;
+        while (tries < 10) {
+            try {
+                HttpResponse<String> response = Unirest.get("http://" + bookingsAddress + "/list")
+                        .asString();
 
-            // Iterate through each booking and print its id and name
-            for (JsonElement element : bookings) {
-                JsonObject obj = element.getAsJsonObject();
-                UUID id = UUID.fromString(obj.get("id").getAsString());
-                UUID apartmentId = UUID.fromString(obj.get("apartmentID").getAsString());
-                Date fromDate = Date.valueOf(obj.get("fromDate").getAsString());
-                Date toDate = Date.valueOf(obj.get("toDate").getAsString());
-                SearchDAO.addBooking(id, apartmentId, fromDate, toDate);
-                System.out.println("Fetched booking: " + id);
+                if (response.isSuccess()) {
+                    String body = response.getBody();
+
+                    // Parse the JSON response
+                    JsonArray bookings = JsonParser.parseString(body).getAsJsonArray();
+                    System.out.println("Bookings fetched: " + bookings);
+
+                    // Iterate through each booking and print its id and name
+                    for (JsonElement element : bookings) {
+                        JsonObject obj = element.getAsJsonObject();
+                        UUID id = UUID.fromString(obj.get("id").getAsString());
+                        UUID apartmentId = UUID.fromString(obj.get("apartmentID").getAsString());
+                        Date fromDate = Date.valueOf(obj.get("fromDate").getAsString());
+                        Date toDate = Date.valueOf(obj.get("toDate").getAsString());
+                        SearchDAO.addBooking(id, apartmentId, fromDate, toDate);
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error occurred while fetching bookings" + e);
             }
-        } else {
-            System.out.println("Failed to fetch bookings from the Booking service.");
+
+            tries++;
+            System.out.println("Failed to fetch bookings from the Booking service. Attempt " + tries + " Retrying...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

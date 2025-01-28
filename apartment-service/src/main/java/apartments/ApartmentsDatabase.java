@@ -9,14 +9,10 @@ public class ApartmentsDatabase {
     private static final String DB_PATH = System.getenv("APARTMENT_DB_PATH") != null ?
             System.getenv("APARTMENT_DB_PATH") : "apartments.db";
 
-    private static Connection connection;
 
     // Connect to SQLite database
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) { // Ensure the connection is open
-            connection = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
-        }
-        return connection;
+        return DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
     }
 
     // Initialize the database (create tables if they don't exist)

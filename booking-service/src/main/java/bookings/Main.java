@@ -8,7 +8,6 @@ import common.StringMessage;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
-import java.sql.Date;
 import java.util.UUID;
 
 public class Main {
@@ -47,7 +46,6 @@ public class Main {
         // Publish a hello world to the MQ
         BookingsMQService.INSTANCE.publishMessage(new StringMessage("Hello, World From Bookings!"));
 
-
         try {
             Thread.sleep(10000);  // Sleep for a short time so other services can start
             if (BookingsDAO.INSTANCE.listApartments().isEmpty()) {
@@ -72,26 +70,41 @@ public class Main {
     }
 
     public static void fetchApartmentsDirectly() {
-        System.out.println("Fetching apartments from the Apartment service...");
-        HttpResponse<String> response = Unirest.get("http://" +
-                        ConsulService.discoverServiceAddress("apartments") + "/list")
-                .asString();
+        String apartmentsAddress = ConsulService.discoverServiceAddress("apartments");
+        System.out.println("Fetching apartments from the Apartment service from " + apartmentsAddress);
+        int tries = 0;
+        while (tries < 10) {
+            try {
+                HttpResponse<String> response = Unirest.get("http://" + apartmentsAddress + "/list").asString();
 
-        if (response.isSuccess()) {
-            String body = response.getBody();
+                if (response.isSuccess()) {
+                    String body = response.getBody();
 
-            // Parse the JSON response
-            JsonArray apartments = JsonParser.parseString(body).getAsJsonArray();
+                    // Parse the JSON response
+                    JsonArray apartments = JsonParser.parseString(body).getAsJsonArray();
+                    System.out.println("Apartments fetched: " + apartments);
 
-            // Iterate through each apartment and print its id and name
-            for (JsonElement element : apartments) {
-                UUID id = UUID.fromString(element.getAsJsonObject().get("id").getAsString());
-                String name = element.getAsJsonObject().get("name").getAsString();
-                BookingsDAO.INSTANCE.addApartment(id, name);
-                System.out.println("Fetched apartment: " + name);
+                    // Iterate through each apartment and print its id and name
+                    for (JsonElement element : apartments) {
+                        UUID id = UUID.fromString(element.getAsJsonObject().get("id").getAsString());
+                        String name = element.getAsJsonObject().get("name").getAsString();
+                        BookingsDAO.INSTANCE.addApartment(id, name);
+                    }
+                    return;
+                }else{
+                    System.out.println("HTTP error while fetching apartments " + response);
+                }
+            } catch (Exception e) {
+                System.out.println("Error occurred while fetching apartments" + e);
             }
-        } else {
-            System.out.println("Failed to fetch apartments from the Apartment service.");
+
+            tries++;
+            System.out.println("Failed to fetch apartments from the Apartment service. Attempt " + tries + " Retrying...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

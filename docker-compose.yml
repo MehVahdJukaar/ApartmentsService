@@ -84,3 +84,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  gradle-cache:

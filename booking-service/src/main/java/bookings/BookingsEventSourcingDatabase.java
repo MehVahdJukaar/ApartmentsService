@@ -10,14 +10,9 @@ public class BookingsEventSourcingDatabase {
     private static final String DB_PATH = System.getenv("BOOKING_DB_PATH") != null ?
             System.getenv("BOOKING_ES_DB_PATH") : "bookings_es.db";
 
-    private Connection connection;
-
     // Connect to SQLite database
     public Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) { // Ensure the connection is open
-            connection = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
-        }
-        return connection;
+        return DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
     }
 
     // Initialize the database (create tables if they don't exist)
