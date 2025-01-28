@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"  # Map container's 8080 port to host's 8080 port
+    volumes:
+      - gradle-cache:/root/.gradle # Cache Gradle dependencies
     depends_on:
       - consul
       - rabbitmq
@@ -17,6 +19,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8081"  # Map container's 8081 port to host's 8081 port
+    volumes:
+      - gradle-cache:/root/.gradle # Cache Gradle dependencies
     depends_on:
       - consul
       - rabbitmq
@@ -29,6 +33,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:8082"  # Map container's 8082 port to host's 8082 port
+    volumes:
+      - gradle-cache:/root/.gradle # Cache Gradle dependencies
     depends_on:
       - consul
       - rabbitmq
@@ -42,6 +48,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8083:8083"  # Map container's 8083 port to host's 8083 port
+    volumes:
+      - gradle-cache:/root/.gradle # Cache Gradle dependencies
     depends_on:
       - consul
       - rabbitmq
